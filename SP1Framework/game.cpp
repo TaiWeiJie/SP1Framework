@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <sstream>
 
+
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -318,6 +319,7 @@ void renderGame()
 {
     renderMap();        // renders the map to the buffer first
     renderCharacter();  // renders the character into the buffer
+    renderCrops();      // render a sqaure tile to represent crops
 }
 
 void renderMap()
@@ -341,12 +343,34 @@ void renderMap()
 void renderCharacter()
 {
     // Draw the location of the character
-    WORD charColor = 0x0C;
+    WORD charColor = 12;
     if (g_sChar.m_bActive)
     {
-        charColor = 0x0A;
+        charColor = 10;
     }
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
+}
+
+void renderCrops()
+{
+    // Draw the location of the character
+    WORD charColor = 14;
+    if (g_sChar.m_bActive)
+    {
+        charColor = 14;
+    }
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)8, charColor);
+
+}
+
+void renderEnemies()
+{
+    WORD charColor = 9;
+    if (g_sChar.m_bActive)
+    {
+        charColor = 9;
+    }
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)4, charColor);
 }
 
 void renderFramerate()
