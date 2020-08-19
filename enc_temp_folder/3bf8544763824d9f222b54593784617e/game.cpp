@@ -380,7 +380,13 @@ void renderMap()
             g_Console.writeToBuffer(c, "  ", colors[1]);
         }
     }
-    
+    for (int i = 0; i < 80; ++i)
+    {
+        c.X = 30;
+        c.Y = 40;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
 }
 
 
