@@ -337,7 +337,7 @@ void renderMap()
 {
     // Set up sample colours, and output shadings
     const WORD colors[] = {
-        9,10,12,14,31
+        9,26,20,22,31,
     };
 
     COORD c;
@@ -350,19 +350,19 @@ void renderMap()
     c.X = 36;
     c.Y = 9;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "Start", colors[0]);
+    g_Console.writeToBuffer(c, "Start", colors[4]);
 
     c.X = 33;
     c.Y = 11;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "How to Play", colors[0]);
+    g_Console.writeToBuffer(c, "How to Play", colors[4]);
 
     c.X = 37;
     c.Y = 13;
-    colour(colors[0]);
-    g_Console.writeToBuffer(c, "Quit", colors[0]);
+    colour(colors[4]);
+    g_Console.writeToBuffer(c, "Quit", colors[4]);
 
-    if (g_sChar.m_cLocation.Y == 9 && g_sChar.m_cLocation.X >= 36 && g_sChar.m_cLocation.X < 41)
+    if (g_mouseEvent.mousePosition.Y == 9 && g_mouseEvent.mousePosition.X >= 36 && g_mouseEvent.mousePosition.X < 41)
     {
         c.X = 36;
         c.Y = 9;
@@ -370,7 +370,7 @@ void renderMap()
         g_Console.writeToBuffer(c, "Start", colors[1]);
     }
 
-    if (g_sChar.m_cLocation.Y == 11 && g_sChar.m_cLocation.X >= 33 && g_sChar.m_cLocation.X < 44)
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 33 && g_mouseEvent.mousePosition.X < 44)
     {
         c.X = 33;
         c.Y = 11;
@@ -378,7 +378,7 @@ void renderMap()
         g_Console.writeToBuffer(c, "How to Play", colors[3]);
     }
 
-    if (g_sChar.m_cLocation.Y == 13 && g_sChar.m_cLocation.X >= 37 && g_sChar.m_cLocation.X < 41)
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 37 && g_mouseEvent.mousePosition.X < 41)
     {
         c.X = 37;
         c.Y = 13;
