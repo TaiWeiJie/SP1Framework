@@ -27,6 +27,11 @@ public:
     void    startTimer        ( void );                // start the timer by getting current time and store it
     double  getElapsedTime    ( void );                // get time in seconds since the last call to this function
     void    waitUntil         ( long long llTime);     // wait until this time in milliseconds has passed
+
+    void    setTimeout        (int delay);
+    void    setInterval       (int interval);
+    void    stop();
 };
+
 
 #endif // _TIMER_H

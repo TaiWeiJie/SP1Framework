@@ -380,15 +380,15 @@ void renderInputEvents()
         ss.str("");
         switch (i)
         {
-        case K_UP: key = "UP";
+        case K_UP: key = "forward";
             break;
-        case K_DOWN: key = "DOWN";
+        case K_DOWN: key = "downward";
             break;
-        case K_LEFT: key = "LEFT";
+        case K_LEFT: key = "left";
             break;
-        case K_RIGHT: key = "RIGHT";
+        case K_RIGHT: key = "right";
             break;
-        case K_SPACE: key = "SPACE";
+        case K_SPACE: key = "space";
             break;
         default: continue;
         }
