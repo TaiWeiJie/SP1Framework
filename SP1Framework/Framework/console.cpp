@@ -146,7 +146,6 @@ void Console::initConsole(COORD consoleSize, LPCSTR lpConsoleTitle)
     SetConsoleActiveScreenBuffer(m_hScreenBuffer);
     m_topleft_c = { 0, 0 };
     m_writeRegion = { 0, 0, m_cConsoleSize.X - 1, m_cConsoleSize.Y - 1 };
-
     // initialize the input console
     initInput();
 }
