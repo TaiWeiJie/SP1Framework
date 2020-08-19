@@ -320,23 +320,7 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
 }
 
-void renderMap()
-{
-    // Set up sample colours, and output shadings
-    const WORD colors[] = {
-        0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
-        0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
-    };
 
-    COORD c;
-    for (int i = 0; i < 12; ++i)
-    {
-        c.X = 5 * i;
-        c.Y = i + 1;
-        colour(colors[i]);
-        g_Console.writeToBuffer(c, " °±²Û", colors[i]);
-    }
-}
 
 void renderCharacter()
 {
@@ -344,9 +328,63 @@ void renderCharacter()
     WORD charColor = 0x0C;
     if (g_sChar.m_bActive)
     {
-        charColor = 0x0A;
+        charColor = 31;
     }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)3, charColor);
+}
+
+void renderMap()
+{
+    // Set up sample colours, and output shadings
+    const WORD colors[] = {
+        9,10,12,14,31
+    };
+
+    COORD c;
+
+    c.X = 33;
+    c.Y = 5;
+    colour(colors[4]);
+    g_Console.writeToBuffer(c, "Locust Rush", colors[4]);
+
+    c.X = 36;
+    c.Y = 9;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "Start", colors[0]);
+
+    c.X = 33;
+    c.Y = 11;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "How to Play", colors[0]);
+
+    c.X = 37;
+    c.Y = 13;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "Quit", colors[0]);
+
+    if (g_sChar.m_cLocation.Y == 9 && g_sChar.m_cLocation.X >= 36 && g_sChar.m_cLocation.X < 41)
+    {
+        c.X = 36;
+        c.Y = 9;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "Start", colors[1]);
+    }
+
+    if (g_sChar.m_cLocation.Y == 11 && g_sChar.m_cLocation.X >= 33 && g_sChar.m_cLocation.X < 44)
+    {
+        c.X = 33;
+        c.Y = 11;
+        colour(colors[3]);
+        g_Console.writeToBuffer(c, "How to Play", colors[3]);
+    }
+
+    if (g_sChar.m_cLocation.Y == 13 && g_sChar.m_cLocation.X >= 37 && g_sChar.m_cLocation.X < 41)
+    {
+        c.X = 37;
+        c.Y = 13;
+        colour(colors[2]);
+        g_Console.writeToBuffer(c, "Quit", colors[2]);
+    }
 }
 
 void renderFramerate()
@@ -400,9 +438,9 @@ void renderInputEvents()
             ss << key << " not pressed";
 
         COORD c = { startPos.X, startPos.Y + i };
-        g_Console.writeToBuffer(c, ss.str(), 0x17);
+        g_Console.writeToBuffer(c, ss.str(), 23);
     }
-
+    
     // mouse events    
     ss.str("");
     ss << "Mouse position (" << g_mouseEvent.mousePosition.X << ", " << g_mouseEvent.mousePosition.Y << ")";
