@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+using namespace std;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -324,19 +325,33 @@ void renderMap()
 {
     // Set up sample colours, and output shadings
     const WORD colors[] = {
-        0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
-        0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
+        32 //make bg green
     };
-
+    
     COORD c;
-    for (int i = 0; i < 12; ++i)
+    for (int i = 0; i < 50; ++i)
     {
-        c.X = 5 * i;
-        c.Y = i + 1;
-        colour(colors[i]);
-        g_Console.writeToBuffer(c, " °±²Û", colors[i]);
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = r;
+            c.Y = i;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "  ", colors[0]);
+        }
+    }
+    for (int i = 0; i < 80; ++i)
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = i;
+            c.Y = r;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "  ", colors[0]);
+        }
     }
 }
+
+
 
 void renderCharacter()
 {
