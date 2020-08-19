@@ -147,6 +147,10 @@ void Console::initConsole(COORD consoleSize, LPCSTR lpConsoleTitle)
     m_topleft_c = { 0, 0 };
     m_writeRegion = { 0, 0, m_cConsoleSize.X - 1, m_cConsoleSize.Y - 1 };
 
+    HWND hwnd = GetConsoleWindow();
+    RECT rect = { 1000, 1000, 3000, 5000 };
+    MoveWindow(hwnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+
     // initialize the input console
     initInput();
 }
