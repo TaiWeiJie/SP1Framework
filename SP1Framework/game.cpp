@@ -381,6 +381,64 @@ void renderMap()
         }
     }
     
+        for (int i = 0; i < 50; ++i) //yellow spot
+        {
+            c.X = 30;
+            c.Y = 10;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+        for (int i = 0; i < 50; ++i) //yellow spot
+        {
+            c.X = 36;
+            c.Y = 14;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+        for (int i = 0; i < 50; ++i) //yellow spot
+        {
+            c.X = 11;
+            c.Y = 14;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+        for (int i = 0; i < 50; ++i) //yellow spot
+        {
+            c.X = 19;
+            c.Y = 5;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+        for (int i = 0; i < 50; ++i) //yellow spot
+        {
+            c.X = 26;
+            c.Y = 2;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+    
+    for (int i = 0; i < 50; ++i) //yellow spot
+    {
+        c.X = 43;
+        c.Y = 7;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 40; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 20;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 42; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 19;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    
 }
 
 
