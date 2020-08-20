@@ -380,36 +380,77 @@ void renderMap()
             g_Console.writeToBuffer(c, "  ", colors[1]);
         }
     }
-    
-        for (int i = 0; i < 50; ++i) //yellow spot
-        {
-            c.X = 30;
-            c.Y = 10;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-        for (int i = 0; i < 50; ++i) //yellow spot
+    for (int i = 44; i < 50; ++i) //top right line
+    {
+        c.X = i;
+        c.Y = 5;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 37;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 1;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 2;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //top right lines
+    {
+        c.X = 47;
+        c.Y = 6;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 30;
+        c.Y = 10;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+        for (int i = 0; i < 50; ++i) //scattered yellow spot
         {
             c.X = 36;
             c.Y = 14;
             colour(colors[1]);
             g_Console.writeToBuffer(c, "  ", colors[1]);
         }
-        for (int i = 0; i < 50; ++i) //yellow spot
+        for (int i = 0; i < 50; ++i) //scattered yellow spot
         {
             c.X = 11;
             c.Y = 14;
             colour(colors[1]);
             g_Console.writeToBuffer(c, "  ", colors[1]);
         }
-        for (int i = 0; i < 50; ++i) //yellow spot
+        for (int i = 0; i < 50; ++i) //scattered yellow spot
         {
             c.X = 19;
             c.Y = 5;
             colour(colors[1]);
             g_Console.writeToBuffer(c, "  ", colors[1]);
         }
-        for (int i = 0; i < 50; ++i) //yellow spot
+        for (int i = 0; i < 50; ++i) //scattered yellow spot
         {
             c.X = 26;
             c.Y = 2;
@@ -417,28 +458,99 @@ void renderMap()
             g_Console.writeToBuffer(c, "  ", colors[1]);
         }
     
-    for (int i = 0; i < 50; ++i) //yellow spot
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
     {
         c.X = 43;
         c.Y = 7;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-    for (int i = 40; i < 50; ++i) //bottom right lines
+   
+    for (int i = 47; i < 50; ++i) //bottom right lines
     {
         c.X = i;
-        c.Y = 20;
+        c.Y = 23;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 44; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 22;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
     for (int i = 42; i < 50; ++i) //bottom right lines
     {
         c.X = i;
+        c.Y = 21;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 42; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 20;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 43; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
         c.Y = 19;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
+    for (int i = 45; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 18;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 48; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 17;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 8; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 10;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 6; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 11;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 2; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 12;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
     
+    for (int i = 0; i < 13; ++i) //bottom left lines
+    {
+        c.X = i;
+        c.Y = 19;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 8; ++i) //bottom left lines
+    {
+        c.X = i;
+        c.Y = 18;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
 }
 
 
