@@ -589,7 +589,7 @@ void renderCharacter()
         charColor = 0x0A;
     }
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
-
+}
 
 void renderFramerate()
 {
