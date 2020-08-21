@@ -6,12 +6,14 @@
 #include "Windows.h"
 
 CStopWatch g_Timer;                            // Timer function to keep track of time and the frame rate
-bool g_bQuitGame = false;                    // Set to true if you want to quit the game
+bool g_bQuitGame = false;                      // Set to true if you want to quit the game
+                                              
 const unsigned char gc_ucFPS = 100;                // FPS of this game
 const unsigned int gc_uFrameTime = 1000 / gc_ucFPS;    // time for each frame
 
 //main loop declaration
 void mainLoop( void );
+
 
 // TODO:
 // Bug in waitUntil. it waits for the time from getElapsedTime to waitUntil, but should be insignificant.
@@ -45,3 +47,4 @@ void mainLoop( void )
         g_Timer.waitUntil(gc_uFrameTime);   // Frame rate limiter. Limits each frame to a specified time in ms.      
     }    
 }
+

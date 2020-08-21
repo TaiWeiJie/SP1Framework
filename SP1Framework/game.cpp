@@ -129,6 +129,10 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
         break;
     case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
         break;
+    case S_GUIDE: gameplayMouseHandler(mouseEvent);
+        break;
+    case S_MENU: gameplayMouseHandler(mouseEvent);
+        break;
     }
 }
 
@@ -210,6 +214,9 @@ void update(double dt)
             break;
         case S_GAME: updateGame(); // gameplay logic when we are in the game
             break;
+        case S_GUIDE: updateguide(); // logic for how to play screen
+            break;
+        case S_MENU: updatemenu();   // logic for menu
     }
 }
 
@@ -217,7 +224,7 @@ void update(double dt)
 void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_dElapsedTime > 3.0) // wait for 3 seconds to switch to game mode, else do nothing
-        g_eGameState = S_GAME;
+        g_eGameState = S_MENU;
 }
 
 void updateGame()       // gameplay logic
@@ -262,7 +269,40 @@ void processUserInput()
 {
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
-        g_bQuitGame = true;    
+        g_eGameState = S_MENU;   
+    
+}
+
+// for detecting if user clicks on back button in How To PLay screen
+void GuideInput()
+{
+    if (g_mouseEvent.mousePosition.Y == 23 && g_mouseEvent.mousePosition.X >= 63 && g_mouseEvent.mousePosition.X < 67 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+}
+
+void MenuInput()
+{
+    // quits the game if user clicks on "quit" button
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 37 && g_mouseEvent.mousePosition.X < 41 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_bQuitGame = true;
+    }
+    // displays guide for game (Not functional yet)
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 33 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GUIDE;
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 9 && g_mouseEvent.mousePosition.X >= 36 && g_mouseEvent.mousePosition.X < 41 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GAME;
+    }
 }
 
 //--------------------------------------------------------------
@@ -281,6 +321,10 @@ void render()
     case S_SPLASHSCREEN: renderSplashScreen();
         break;
     case S_GAME: renderGame();
+        break;
+    case S_GUIDE: renderguide();
+        break;
+    case S_MENU: rendermenu();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -320,22 +364,9 @@ void renderGame()
     renderCharacter();  // renders the character into the buffer
 }
 
-
-
-void renderCharacter()
+//Renders the menu screen
+void rendermenu()
 {
-    // Draw the location of the character
-    WORD charColor = 0x0C;
-    if (g_sChar.m_bActive)
-    {
-        charColor = 31;
-    }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)3, charColor);
-}
-
-void renderMap()
-{
-    // Set up sample colours, and output shadings
     const WORD colors[] = {
         9,26,20,22,31,
     };
@@ -362,6 +393,7 @@ void renderMap()
     colour(colors[4]);
     g_Console.writeToBuffer(c, "Quit", colors[4]);
 
+    //color change when mouse is over buttons
     if (g_mouseEvent.mousePosition.Y == 9 && g_mouseEvent.mousePosition.X >= 36 && g_mouseEvent.mousePosition.X < 41)
     {
         c.X = 36;
@@ -385,6 +417,92 @@ void renderMap()
         colour(colors[2]);
         g_Console.writeToBuffer(c, "Quit", colors[2]);
     }
+}
+
+void updatemenu()
+{
+    MenuInput();
+    rendermenu();
+}
+
+void updateguide()
+{
+    GuideInput();
+    renderguide();
+}
+
+//renders How To Play screen
+void renderguide() 
+{
+    COORD c = g_Console.getConsoleSize();
+    c.Y /= 7;
+    c.X = c.X / 2 - 10;
+    g_Console.writeToBuffer(c, "==Controls==", 31);
+    c.Y += 1;
+    c.X = g_Console.getConsoleSize().X / 2 - 9;
+    g_Console.writeToBuffer(c, "Arrow Keys", 31);
+    c.Y += 1;
+    c.X = g_Console.getConsoleSize().X / 2 - 9;
+    g_Console.writeToBuffer(c, "WASD keys", 31);
+    c.Y += 2;
+    c.X = g_Console.getConsoleSize().X / 2 - 11;
+    g_Console.writeToBuffer(c, "==How to Play==", 31);
+    c.Y += 1;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "Move your locust to a piece of farmland, it will solwly start to eat the crops.", 31);
+    c.Y += 2;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "By doing so, it will increase your locust population. The larger the population, the faster you consume crops.", 31);
+    c.Y += 3;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "Watch out for predators, they will attack your locust population on close promixity. If your whole swarm is eaten, you will lose.", 31);
+    c.Y += 3;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "Bewarned, increasing your locust population beyond (limit) will result in the pest control being called in, resulting in a defeat.", 31);
+    c.Y += 3;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "To win, the swarm must consume all the crops on the field in the shortest amount of time, without dying to either predators or pest control.", 31);
+ 
+    c.X = 63;
+    c.Y = 23;
+    g_Console.writeToBuffer(c, "Back", 15);
+
+    if(g_mouseEvent.mousePosition.Y == 23 && g_mouseEvent.mousePosition.X >= 63 && g_mouseEvent.mousePosition.X < 67)
+    {
+        c.X = 63;
+        c.Y = 23;
+        g_Console.writeToBuffer(c, "Back", 12);
+    }
+     
+}
+
+    
+
+
+
+void renderCharacter()
+{
+    // Draw the location of the character
+    WORD charColor = 0x0C;
+    if (g_sChar.m_bActive)
+    {
+        charColor = 31;
+    }
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)6, charColor);
+}
+
+void renderMap()
+{
+    // Set up sample colours, and output shadings
+    
+    COORD c;
+
+    c.X = 20;
+    c.Y = 9;
+    
+    g_Console.writeToBuffer(c, "This is a map, press esc to return to menu", 31);
+
+    
 }
 
 void renderFramerate()

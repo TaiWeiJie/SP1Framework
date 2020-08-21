@@ -5,6 +5,7 @@
 
 extern CStopWatch g_swTimer;
 extern bool g_bQuitGame;
+//extern bool openguide;  may be useless
 
 // struct to store keyboard events
 // a small subset of KEY_EVENT_RECORD
@@ -39,6 +40,8 @@ enum EKEYS
 enum EGAMESTATES
 {
     S_SPLASHSCREEN,
+    S_MENU,
+    S_GUIDE,
     S_GAME,
     S_COUNT
 };
@@ -68,6 +71,12 @@ void renderCharacter();     // renders the character into the buffer
 void renderFramerate();     // renders debug information, frame rate, elapsed time, etc
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
+void updateguide();         // Updates guide
+void updatemenu();          // Updates Menu
+void renderguide();         // renders How To Play Screen
+void GuideInput();          // Check for inputs in How To Play screen
+void rendermenu();          // Renders the menu screen
+void MenuInput();           // Check for inputs in main menu
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
