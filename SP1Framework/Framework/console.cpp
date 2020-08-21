@@ -122,33 +122,38 @@ Console::~Console()
 
 void Console::initConsole(COORD consoleSize, LPCSTR lpConsoleTitle)
 {
-	this->m_cConsoleSize = consoleSize;
+    this->m_cConsoleSize = consoleSize;
     // Use the ascii version for the consoleTitle
     SetConsoleTitleA(lpConsoleTitle);
     SetConsoleCP(437);
-    
+
     // set up screen buffer    
-	m_ciScreenDataBuffer = new CHAR_INFO[m_u32ScreenDataBufferSize];
+    m_ciScreenDataBuffer = new CHAR_INFO[m_u32ScreenDataBufferSize];
 
-    m_hScreenBuffer = CreateConsoleScreenBuffer( 
-       GENERIC_READ |           // read/write access 
-       GENERIC_WRITE, 
-       FILE_SHARE_READ | 
-       FILE_SHARE_WRITE,        // shared 
-       NULL,                    // default security attributes 
-       CONSOLE_TEXTMODE_BUFFER, // must be TEXTMODE 
-       NULL);                   // reserved; must be NULL 
+    m_hScreenBuffer = CreateConsoleScreenBuffer(
+        GENERIC_READ |           // read/write access 
+        GENERIC_WRITE,
+        FILE_SHARE_READ |
+        FILE_SHARE_WRITE,        // shared 
+        NULL,                    // default security attributes 
+        CONSOLE_TEXTMODE_BUFFER, // must be TEXTMODE 
+        NULL);                   // reserved; must be NULL 
 
-	m_cMaxConsoleSize = GetLargestConsoleWindowSize(m_hScreenBuffer);
+    m_cMaxConsoleSize = GetLargestConsoleWindowSize(m_hScreenBuffer);
 
-	// Sets the console size
-	setConsoleWindowSize();
+    // Sets the console size
+    setConsoleWindowSize();
     SetConsoleActiveScreenBuffer(m_hScreenBuffer);
     m_topleft_c = { 0, 0 };
     m_writeRegion = { 0, 0, m_cConsoleSize.X - 1, m_cConsoleSize.Y - 1 };
-    // initialize the input console
+
+    //Console Size Adjustment
+    HWND hwnd = GetConsoleWindow();
+    RECT rect = { 1000, 1000, 3000, 5000 };
+    MoveWindow(hwnd, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
     initInput();
 }
+
 
 void Console::initInput()
 {

@@ -6,7 +6,6 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-using namespace std;
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -415,6 +414,20 @@ void renderMap()
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
+    for (int i = 0; i < 52; ++i) //yellow spot at top right
+    {
+        c.X = 51;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 60; ++i) //yellow spot at top right
+    {
+        c.X = 57;
+        c.Y = 1;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
     for (int i = 0; i < 50; ++i) //top right lines
     {
         c.X = 47;
@@ -466,42 +479,63 @@ void renderMap()
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
    
-    for (int i = 47; i < 50; ++i) //bottom right lines
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 50;
+        c.Y = 9;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 63;
+        c.Y = 16;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 30;
+        c.Y = 21;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 60; i < 62; ++i) //bottom right lines
     {
         c.X = i;
         c.Y = 23;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-    for (int i = 44; i < 50; ++i) //bottom right lines
+    for (int i = 44; i < 53; ++i) //bottom right lines
     {
         c.X = i;
         c.Y = 22;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-    for (int i = 42; i < 50; ++i) //bottom right lines
+    for (int i = 42; i < 54; ++i) //bottom right lines
     {
         c.X = i;
         c.Y = 21;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-    for (int i = 42; i < 50; ++i) //bottom right lines
+    for (int i = 42; i < 54; ++i) //bottom right lines
     {
         c.X = i;
         c.Y = 20;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-    for (int i = 43; i < 50; ++i) //bottom right lines
+    for (int i = 43; i < 55; ++i) //bottom right lines
     {
         c.X = i;
         c.Y = 19;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-    for (int i = 45; i < 50; ++i) //bottom right lines
+    for (int i = 45; i < 51; ++i) //bottom right lines
     {
         c.X = i;
         c.Y = 18;
@@ -548,6 +582,34 @@ void renderMap()
     {
         c.X = i;
         c.Y = 18;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 53; i < 60; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 13;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 56; i < 59; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 12;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 56; i < 60; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 15;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 52; i < 62; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 14;
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
