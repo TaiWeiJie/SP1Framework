@@ -324,9 +324,9 @@ void renderMap()
 {
     // Set up sample colours, and output shadings
     const WORD colors[] = {
-        32, 96 //32 for green, 32+96 for yellow
+        32, 130 //32 for green, 130 gray, 110 yellow
     };
-    
+
     COORD c;
     for (int i = 0; i < 50; ++i) //green bg
     {
@@ -356,35 +356,17 @@ void renderMap()
             c.Y = i;
             colour(colors[1]);
             g_Console.writeToBuffer(c, "  ", colors[1]);
-            
         }
 
-        WORD charColor = 14;
-        for (int r = 0; r < i; ++r)
-        {
-            c.X = r;
-            c.Y = i;
-            colour(colors[8]);
-            g_Console.writeToBuffer(c, "  ", colors[8]);
-        }
     }
     for (int i = 40; i < 50; ++i) //yellowish top right
     {
         for (int r = 0; r < 5; ++r)
         {
             c.X = i;
-            c.Y = 5;
+            c.Y = r;
             colour(colors[1]);
             g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-
-        WORD charColor = 14;
-        for (int r = 0; r < 5; ++r)
-        {
-            c.X = i;
-            c.Y = 5;
-            colour(colors[8]);
-            g_Console.writeToBuffer(c, "  ", colors[8]);
         }
     }
     for (int i = 0; i < 10; ++i) //yellow top left
@@ -395,15 +377,6 @@ void renderMap()
             c.Y = i;
             colour(colors[1]);
             g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-
-        WORD charColor = 14;
-        for (int r = 0; r < i; ++r)
-        {
-            c.X = r;
-            c.Y = i;
-            colour(colors[8]);
-            g_Console.writeToBuffer(c, "  ", colors[8]);
         }
     }
     for (int i = 44; i < 50; ++i) //top right line
@@ -469,35 +442,35 @@ void renderMap()
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-        for (int i = 0; i < 50; ++i) //scattered yellow spot
-        {
-            c.X = 36;
-            c.Y = 14;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-        for (int i = 0; i < 50; ++i) //scattered yellow spot
-        {
-            c.X = 11;
-            c.Y = 14;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-        for (int i = 0; i < 50; ++i) //scattered yellow spot
-        {
-            c.X = 19;
-            c.Y = 5;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-        for (int i = 0; i < 50; ++i) //scattered yellow spot
-        {
-            c.X = 26;
-            c.Y = 2;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-    
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 36;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 11;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 19;
+        c.Y = 5;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 26;
+        c.Y = 2;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+
     for (int i = 0; i < 50; ++i) //scattered yellow spot
     {
         c.X = 43;
@@ -505,7 +478,7 @@ void renderMap()
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-   
+
     for (int i = 0; i < 65; ++i) //scattered yellow spot
     {
         c.X = 50;
@@ -597,7 +570,7 @@ void renderMap()
         colour(colors[1]);
         g_Console.writeToBuffer(c, "  ", colors[1]);
     }
-    
+
     for (int i = 0; i < 13; ++i) //bottom left lines
     {
         c.X = i;
@@ -642,6 +615,8 @@ void renderMap()
     }
 }
 
+
+
 void renderCharacter()
 {
     // Draw the location of the character
@@ -651,7 +626,7 @@ void renderCharacter()
         charColor = 0x0A;
     }
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
-
+}
 
 void renderFramerate()
 {
