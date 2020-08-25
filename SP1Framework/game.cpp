@@ -18,6 +18,7 @@ SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 // Game specific variables here
+DIRECTION   direction;
 SGameChar   g_sChar;
 SGameCrop   g_sCrops;
 SGameCrop   g_sSpiders;
@@ -253,41 +254,87 @@ void splashScreenWait()    // waits for time to pass in splash screen
 void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
+    MoveInput();
     moveCharacter();    // moves the character, collision detection, physics, etc
-                        // sound can be played here too.
+    //spiderMoves();      // spider will move around and kill player if caught
+                        
 }
 
-void moveCharacter()
+void MoveInput()
 {
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0)
+    if (g_skKeyEvent[K_UP].keyDown)
     {
-        //Beep(1440, 30);
-        g_sChar.m_cLocation.Y--;
+        direction.up = true;
     }
-    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
+    if (g_skKeyEvent[K_LEFT].keyDown )
     {
-        //Beep(1440, 30);
-        g_sChar.m_cLocation.X--;
+        direction.left = true;
     }
-    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    if (g_skKeyEvent[K_DOWN].keyDown )
     {
-        //Beep(1440, 30);
-        g_sChar.m_cLocation.Y++;
+        direction.down = true;
     }
-    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (g_skKeyEvent[K_RIGHT].keyDown )
     {
-        //Beep(1440, 30);
-        g_sChar.m_cLocation.X++;
+        direction.right = true;
+    }
+    if (g_skKeyEvent[K_UP].keyReleased )
+    {
+        direction.up = false;
+    }
+    if (g_skKeyEvent[K_LEFT].keyReleased )
+    {
+        direction.left = false;
+    }
+    if (g_skKeyEvent[K_DOWN].keyReleased )
+    {
+        direction.down = false;
+    }
+    if (g_skKeyEvent[K_RIGHT].keyReleased )
+    {
+        direction.right = false;
     }
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
+}
 
+void moveCharacter()
+{
+    if (direction.up == true && g_sChar.m_cLocation.Y > 0)
+    {
+        g_sChar.m_cLocation.Y--;
+    }
+    if (direction.left == true && g_sChar.m_cLocation.X > 0)
+    {
+        //Beep(1440, 30);
+        g_sChar.m_cLocation.X--;
+    }
+    if (direction.down == true && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    {
+        //Beep(1440, 30);
+        g_sChar.m_cLocation.Y++;
+    }
+    if (direction.right == true && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    {
+        //Beep(1440, 30);
+        g_sChar.m_cLocation.X++;
+    }
 
 }
+
+/*
+void spiderMoves()
+{
+    if (g_sSpiders.m_bActive = true)
+    {
+        
+    }
+}
+*/
 void processUserInput()
 {
     // quits the game if player hits the escape key
@@ -387,7 +434,6 @@ void renderGame()
     renderCrops();      // renders the mobs into the buffer
     renderSpiders();    // renders spiders into the buffer next
     renderCharacter();  // renders the character into the buffer
-
 }
 
 //Renders the menu screen
@@ -847,7 +893,7 @@ void renderFramerate()
 
     // displays the elapsed time
     ss.str("");
-    ss << g_dElapsedTime << "secs";
+    ss << g_dElapsedTime << "secs"; 
     c.X = 0;
     c.Y = 0;
     g_Console.writeToBuffer(c, ss.str(), 0x59);
