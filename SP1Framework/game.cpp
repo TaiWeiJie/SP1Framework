@@ -7,6 +7,10 @@
 #include <iomanip>
 #include <sstream>
 
+#define VK_W 0x57
+#define VK_A 0x41
+#define VK_S 0x53
+#define VK_D 0x44
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
@@ -15,6 +19,8 @@ SMouseEvent g_mouseEvent;
 
 // Game specific variables here
 SGameChar   g_sChar;
+SGameCrop   g_sCrops;
+SGameCrop   g_sSpiders;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 // Console object
@@ -27,10 +33,10 @@ Console g_Console(80, 25, "SP1 Framework");
 // Input    : void
 // Output   : void
 //--------------------------------------------------------------
-void init( void )
+void init(void)
 {
     // Set precision for floating point output
-    g_dElapsedTime = 0.0;    
+    g_dElapsedTime = 0.0;
 
     // sets the initial state for the game
     g_eGameState = S_SPLASHSCREEN;
@@ -38,7 +44,19 @@ void init( void )
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
     g_sChar.m_bActive = true;
-    // sets the width, height and the font name to use in the console
+
+    srand((unsigned)time(0));
+    g_sCrops.m_cLocation.X = (rand() % 72);
+    g_sCrops.m_cLocation.Y = (rand() % 24);
+    g_sCrops.m_bActive = true;
+
+    srand((unsigned)time(0));
+    g_sSpiders.m_cLocation.X = (rand() % 68);
+    g_sSpiders.m_cLocation.Y = (rand() % 22);
+    g_sSpiders.m_bActive = true;
+
+
+    //sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
 
     // remember to set your keyboard handler, so that your functions can be notified of input events
@@ -53,7 +71,7 @@ void init( void )
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void shutdown( void )
+void shutdown(void)
 {
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
@@ -74,12 +92,12 @@ void shutdown( void )
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void getInput( void )
+void getInput(void)
 {
     // resets all the keyboard events
     memset(g_skKeyEvent, 0, K_COUNT * sizeof(*g_skKeyEvent));
     // then call the console to detect input from user
-    g_Console.readConsoleInput();    
+    g_Console.readConsoleInput();
 }
 
 //--------------------------------------------------------------
@@ -96,7 +114,7 @@ void getInput( void )
 // Output   : void
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{    
+{
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: // don't handle anything for the splash screen
@@ -123,12 +141,16 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 // Output   : void
 //--------------------------------------------------------------
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
-{    
+{
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: // don't handle anything for the splash screen
         break;
     case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+        break;
+    case S_GUIDE: gameplayMouseHandler(mouseEvent);
+        break;
+    case S_MENU: gameplayMouseHandler(mouseEvent);
         break;
     }
 }
@@ -150,10 +172,14 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
     case VK_UP: key = K_UP; break;
     case VK_DOWN: key = K_DOWN; break;
-    case VK_LEFT: key = K_LEFT; break; 
-    case VK_RIGHT: key = K_RIGHT; break; 
+    case VK_LEFT: key = K_LEFT; break;
+    case VK_RIGHT: key = K_RIGHT; break;
     case VK_SPACE: key = K_SPACE; break;
-    case VK_ESCAPE: key = K_ESCAPE; break; 
+    case VK_ESCAPE: key = K_ESCAPE; break;
+    case VK_W: key = K_UP; break;
+    case VK_A: key = K_LEFT; break;
+    case VK_S: key = K_DOWN; break;
+    case VK_D: key = K_RIGHT; break;
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -163,7 +189,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
         g_skKeyEvent[key].keyDown = keyboardEvent.bKeyDown;
         g_skKeyEvent[key].keyReleased = !keyboardEvent.bKeyDown;
-    }    
+    }
 }
 
 //--------------------------------------------------------------
@@ -207,10 +233,13 @@ void update(double dt)
 
     switch (g_eGameState)
     {
-        case S_SPLASHSCREEN : splashScreenWait(); // game logic for the splash screen
-            break;
-        case S_GAME: updateGame(); // gameplay logic when we are in the game
-            break;
+    case S_SPLASHSCREEN: splashScreenWait(); // game logic for the splash screen
+        break;
+    case S_GAME: updateGame(); // gameplay logic when we are in the game
+        break;
+    case S_GUIDE: updateguide(); // logic for how to play screen
+        break;
+    case S_MENU: updatemenu();   // logic for menu
     }
 }
 
@@ -218,7 +247,7 @@ void update(double dt)
 void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_dElapsedTime > 3.0) // wait for 3 seconds to switch to game mode, else do nothing
-        g_eGameState = S_GAME;
+        g_eGameState = S_MENU;
 }
 
 void updateGame()       // gameplay logic
@@ -229,41 +258,74 @@ void updateGame()       // gameplay logic
 }
 
 void moveCharacter()
-{    
+{
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (g_skKeyEvent[K_UP].keyReleased && g_sChar.m_cLocation.Y > 0)
+    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y--;       
+        g_sChar.m_cLocation.Y--;
     }
-    if (g_skKeyEvent[K_LEFT].keyReleased && g_sChar.m_cLocation.X > 0)
+    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X--;        
+        g_sChar.m_cLocation.X--;
     }
-    if (g_skKeyEvent[K_DOWN].keyReleased && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y++;        
+        g_sChar.m_cLocation.Y++;
     }
-    if (g_skKeyEvent[K_RIGHT].keyReleased && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X++;        
+        g_sChar.m_cLocation.X++;
     }
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
-        g_sChar.m_bActive = !g_sChar.m_bActive;        
+        g_sChar.m_bActive = !g_sChar.m_bActive;
     }
 
-   
+
 }
 void processUserInput()
 {
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
-        g_bQuitGame = true;    
+        g_eGameState = S_MENU;
+
+}
+
+// for detecting if user clicks on back button in How To PLay screen
+void GuideInput()
+{
+    if (g_mouseEvent.mousePosition.Y == 23 && g_mouseEvent.mousePosition.X >= 63 && g_mouseEvent.mousePosition.X < 67 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+}
+
+void MenuInput()
+{
+    // quits the game if user clicks on "quit" button
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 37 && g_mouseEvent.mousePosition.X < 41 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_bQuitGame = true;
+    }
+    // displays guide for game (Not functional yet)
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 33 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GUIDE;
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 9 && g_mouseEvent.mousePosition.X >= 36 && g_mouseEvent.mousePosition.X < 41 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GAME;
+    }
 }
 
 //--------------------------------------------------------------
@@ -282,6 +344,10 @@ void render()
     case S_SPLASHSCREEN: renderSplashScreen();
         break;
     case S_GAME: renderGame();
+        break;
+    case S_GUIDE: renderguide();
+        break;
+    case S_MENU: rendermenu();
         break;
     }
     renderFramerate();      // renders debug information, frame rate, elapsed time, etc
@@ -318,59 +384,454 @@ void renderSplashScreen()  // renders the splash screen
 void renderGame()
 {
     renderMap();        // renders the map to the buffer first
+    renderCrops();      // renders the mobs into the buffer
+    renderSpiders();    // renders spiders into the buffer next
     renderCharacter();  // renders the character into the buffer
-    renderCrops();      // render a sqaure tile to represent crops
+
 }
 
-void renderMap()
+//Renders the menu screen
+void rendermenu()
 {
-    // Set up sample colours, and output shadings
     const WORD colors[] = {
-        0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0x6F,
-        0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6
+        9,26,20,22,31,
     };
 
     COORD c;
-    for (int i = 0; i < 12; ++i)
+
+    c.X = 33;
+    c.Y = 5;
+    colour(colors[4]);
+    g_Console.writeToBuffer(c, "Locust Rush", colors[4]);
+
+    c.X = 36;
+    c.Y = 9;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "Start", colors[4]);
+
+    c.X = 33;
+    c.Y = 11;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "How to Play", colors[4]);
+
+    c.X = 37;
+    c.Y = 13;
+    colour(colors[4]);
+    g_Console.writeToBuffer(c, "Quit", colors[4]);
+
+    //color change when mouse is over buttons
+    if (g_mouseEvent.mousePosition.Y == 9 && g_mouseEvent.mousePosition.X >= 36 && g_mouseEvent.mousePosition.X < 41)
     {
-        c.X = 5 * i;
-        c.Y = i + 1;
-        colour(colors[i]);
-        g_Console.writeToBuffer(c, " °±²Û", colors[i]);
+        c.X = 36;
+        c.Y = 9;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "Start", colors[1]);
     }
+
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 33 && g_mouseEvent.mousePosition.X < 44)
+    {
+        c.X = 33;
+        c.Y = 11;
+        colour(colors[3]);
+        g_Console.writeToBuffer(c, "How to Play", colors[3]);
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 37 && g_mouseEvent.mousePosition.X < 41)
+    {
+        c.X = 37;
+        c.Y = 13;
+        colour(colors[2]);
+        g_Console.writeToBuffer(c, "Quit", colors[2]);
+    }
+}
+
+void updatemenu()
+{
+    MenuInput();
+    rendermenu();
+}
+
+void updateguide()
+{
+    GuideInput();
+    renderguide();
+}
+
+//renders How To Play screen
+void renderguide()
+{
+    COORD c = g_Console.getConsoleSize();
+    c.Y /= 7;
+    c.X = c.X / 2 - 10;
+    g_Console.writeToBuffer(c, "==Controls==", 31);
+    c.Y += 1;
+    c.X = g_Console.getConsoleSize().X / 2 - 9;
+    g_Console.writeToBuffer(c, "Arrow Keys", 31);
+    c.Y += 1;
+    c.X = g_Console.getConsoleSize().X / 2 - 9;
+    g_Console.writeToBuffer(c, "WASD keys", 31);
+    c.Y += 2;
+    c.X = g_Console.getConsoleSize().X / 2 - 11;
+    g_Console.writeToBuffer(c, "==How to Play==", 31);
+    c.Y += 1;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "Move your locust to a piece of farmland, it will solwly start to eat the crops.", 31);
+    c.Y += 2;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "By doing so, it will increase your locust population. The larger the population, the faster you consume crops.", 31);
+    c.Y += 3;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "Watch out for predators, they will attack your locust population on close promixity. If your whole swarm is eaten, you will lose.", 31);
+    c.Y += 3;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "Bewarned, increasing your locust population beyond (limit) will result in the pest control being called in, resulting in a defeat.", 31);
+    c.Y += 3;
+    c.X = g_Console.getConsoleSize().X / 2 - 40;
+    g_Console.writeToBuffer(c, "To win, the swarm must consume all the crops on the field in the shortest amount of time, without dying to either predators or pest control.", 31);
+
+    c.X = 63;
+    c.Y = 23;
+    g_Console.writeToBuffer(c, "Back", 15);
+
+    if (g_mouseEvent.mousePosition.Y == 23 && g_mouseEvent.mousePosition.X >= 63 && g_mouseEvent.mousePosition.X < 67)
+    {
+        c.X = 63;
+        c.Y = 23;
+        g_Console.writeToBuffer(c, "Back", 12);
+    }
+
+}
+
+void renderCrops()
+{
+    // Draw the location of the spiders
+    WORD charColor = 8;
+    if (g_sCrops.m_bActive)
+    {
+        charColor = 8;
+    }
+    g_Console.writeToBuffer(g_sCrops.m_cLocation, (char)7, charColor);
+}
+
+void renderSpiders()
+{
+    // Draw the location of the spiders
+    WORD charColor = 10;
+    if (g_sSpiders.m_bActive)
+    {
+        charColor = 10;
+    }
+    g_Console.writeToBuffer(g_sSpiders.m_cLocation, (char)7, charColor);
 }
 
 void renderCharacter()
 {
     // Draw the location of the character
-    WORD charColor = 12;
+    WORD charColor = 0x0C;
     if (g_sChar.m_bActive)
     {
-        charColor = 10;
+        charColor = 224;
     }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)1, charColor);
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, charColor);
 }
 
-void renderCrops()
-{
-    // Draw the location of the character
-    WORD charColor = 14;
-    if (g_sChar.m_bActive)
-    {
-        charColor = 14;
-    }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)8, charColor);
 
-}
 
-void renderEnemies()
+void renderMap()
 {
-    WORD charColor = 9;
-    if (g_sChar.m_bActive)
+
+    // Set up sample colours, and output shadings
+    const WORD colors[] = {
+        32, 130 //32 for green, 130 gray, 110 yellow
+    };
+
+    COORD c;
+    for (int i = 0; i < 50; ++i) //green bg
     {
-        charColor = 9;
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = r;
+            c.Y = i;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "  ", colors[0]);
+        }
     }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)4, charColor);
+    for (int i = 0; i < 80; ++i) //green bg
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = i;
+            c.Y = r;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "  ", colors[0]);
+        }
+    }
+    for (int i = 20; i < 50; ++i) //yellow bottom left 
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = r;
+            c.Y = i;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+
+    }
+    for (int i = 40; i < 50; ++i) //yellowish top right
+    {
+        for (int r = 0; r < 5; ++r)
+        {
+            c.X = i;
+            c.Y = r;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+    }
+    for (int i = 0; i < 10; ++i) //yellow top left
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = r;
+            c.Y = i;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+    }
+    for (int i = 44; i < 50; ++i) //top right line
+    {
+        c.X = i;
+        c.Y = 5;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 37;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 1;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 2;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 52; ++i) //yellow spot at top right
+    {
+        c.X = 51;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 60; ++i) //yellow spot at top right
+    {
+        c.X = 57;
+        c.Y = 1;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //top right lines
+    {
+        c.X = 47;
+        c.Y = 6;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 30;
+        c.Y = 10;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 36;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 11;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 19;
+        c.Y = 5;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 26;
+        c.Y = 2;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 43;
+        c.Y = 7;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 50;
+        c.Y = 9;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 63;
+        c.Y = 16;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 30;
+        c.Y = 21;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 60; i < 62; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 23;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 44; i < 53; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 22;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 42; i < 54; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 21;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 42; i < 54; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 20;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 43; i < 55; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 19;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 45; i < 51; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 18;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 48; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 17;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 8; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 10;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 6; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 11;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 2; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 12;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+
+    for (int i = 0; i < 13; ++i) //bottom left lines
+    {
+        c.X = i;
+        c.Y = 19;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 8; ++i) //bottom left lines
+    {
+        c.X = i;
+        c.Y = 18;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 53; i < 60; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 13;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 56; i < 59; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 12;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 56; i < 60; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 15;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 52; i < 62; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+
 }
 
 void renderFramerate()
@@ -396,7 +857,7 @@ void renderFramerate()
 void renderInputEvents()
 {
     // keyboard events
-    COORD startPos = {50, 2};
+    COORD startPos = { 50, 2 };
     std::ostringstream ss;
     std::string key;
     for (int i = 0; i < K_COUNT; ++i)
@@ -404,15 +865,15 @@ void renderInputEvents()
         ss.str("");
         switch (i)
         {
-        case K_UP: key = "forward";
+        case K_UP: key = "UP";
             break;
-        case K_DOWN: key = "downward";
+        case K_DOWN: key = "DOWN";
             break;
-        case K_LEFT: key = "left";
+        case K_LEFT: key = "LEFT";
             break;
-        case K_RIGHT: key = "right";
+        case K_RIGHT: key = "RIGHT";
             break;
-        case K_SPACE: key = "space";
+        case K_SPACE: key = "SPACE";
             break;
         default: continue;
         }
@@ -424,7 +885,7 @@ void renderInputEvents()
             ss << key << " not pressed";
 
         COORD c = { startPos.X, startPos.Y + i };
-        g_Console.writeToBuffer(c, ss.str(), 0x17);
+        g_Console.writeToBuffer(c, ss.str(), 23);
     }
 
     // mouse events    
@@ -454,7 +915,7 @@ void renderInputEvents()
     case DOUBLE_CLICK:
         ss.str("Double Clicked");
         g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 4, ss.str(), 0x59);
-        break;        
+        break;
     case MOUSE_WHEELED:
         if (g_mouseEvent.buttonState & 0xFF000000)
             ss.str("Mouse wheeled down");
@@ -462,11 +923,12 @@ void renderInputEvents()
             ss.str("Mouse wheeled up");
         g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 5, ss.str(), 0x59);
         break;
-    default:        
+    default:
         break;
     }
-    
+
 }
+
 
 
 
