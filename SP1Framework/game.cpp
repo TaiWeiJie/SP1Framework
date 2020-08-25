@@ -7,6 +7,11 @@
 #include <iomanip>
 #include <sstream>
 
+#define VK_W 0x57
+#define VK_A 0x41
+#define VK_S 0x53
+#define VK_D 0x44
+
 double  g_dElapsedTime;
 double  g_dDeltaTime;
 SKeyEvent g_skKeyEvent[K_COUNT];
@@ -14,6 +19,7 @@ SMouseEvent g_mouseEvent;
 
 // Game specific variables here
 SGameChar   g_sChar;
+SGameCrop   g_sCrops;
 EGAMESTATES g_eGameState = S_SPLASHSCREEN; // initial state
 
 // Console object
@@ -37,7 +43,14 @@ void init( void )
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
     g_sChar.m_bActive = true;
-    // sets the width, height and the font name to use in the console
+    
+    srand((unsigned)time(0));
+    g_sCrops.m_cLocation.X = (rand() % 69);
+    g_sCrops.m_cLocation.Y = (rand() % 24);
+    g_sCrops.m_bActive = true;
+
+
+    //sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
 
     // remember to set your keyboard handler, so that your functions can be notified of input events
@@ -157,6 +170,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     case VK_RIGHT: key = K_RIGHT; break; 
     case VK_SPACE: key = K_SPACE; break;
     case VK_ESCAPE: key = K_ESCAPE; break; 
+    case VK_W: key = K_UP; break;
+    case VK_A: key = K_LEFT; break;
+    case VK_S: key = K_DOWN; break;
+    case VK_D: key = K_RIGHT; break;
     }
     // a key pressed event would be one with bKeyDown == true
     // a key released event would be one with bKeyDown == false
@@ -238,22 +255,22 @@ void moveCharacter()
 {    
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (g_skKeyEvent[K_UP].keyReleased && g_sChar.m_cLocation.Y > 0)
+    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y--;       
     }
-    if (g_skKeyEvent[K_LEFT].keyReleased && g_sChar.m_cLocation.X > 0)
+    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X--;        
     }
-    if (g_skKeyEvent[K_DOWN].keyReleased && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y++;        
     }
-    if (g_skKeyEvent[K_RIGHT].keyReleased && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X++;        
@@ -361,7 +378,9 @@ void renderSplashScreen()  // renders the splash screen
 void renderGame()
 {
     renderMap();        // renders the map to the buffer first
+    renderCrops();      // renders the mobs into the buffer
     renderCharacter();  // renders the character into the buffer
+   
 }
 
 //Renders the menu screen
@@ -476,8 +495,11 @@ void renderguide()
      
 }
 
+void renderCrops()
+{
     
-
+    g_Console.writeToBuffer(g_sCrops.m_cLocation, (char)6, 224);
+}
 
 
 void renderCharacter()
@@ -486,22 +508,307 @@ void renderCharacter()
     WORD charColor = 0x0C;
     if (g_sChar.m_bActive)
     {
-        charColor = 31;
+        charColor = 224;
     }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)6, charColor);
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, charColor);
 }
+
+
 
 void renderMap()
 {
+
     // Set up sample colours, and output shadings
-    
+    const WORD colors[] = {
+        32, 130 //32 for green, 130 gray, 110 yellow
+    };
+
     COORD c;
+    for (int i = 0; i < 50; ++i) //green bg
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = r;
+            c.Y = i;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "  ", colors[0]);
+        }
+    }
+    for (int i = 0; i < 80; ++i) //green bg
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = i;
+            c.Y = r;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "  ", colors[0]);
+        }
+    }
+    for (int i = 20; i < 50; ++i) //yellow bottom left 
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = r;
+            c.Y = i;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
 
-    c.X = 20;
-    c.Y = 9;
-    
-    g_Console.writeToBuffer(c, "This is a map, press esc to return to menu", 31);
+    }
+    for (int i = 40; i < 50; ++i) //yellowish top right
+    {
+        for (int r = 0; r < 5; ++r)
+        {
+            c.X = i;
+            c.Y = r;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+    }
+    for (int i = 0; i < 10; ++i) //yellow top left
+    {
+        for (int r = 0; r < i; ++r)
+        {
+            c.X = r;
+            c.Y = i;
+            colour(colors[1]);
+            g_Console.writeToBuffer(c, "  ", colors[1]);
+        }
+    }
+    for (int i = 44; i < 50; ++i) //top right line
+    {
+        c.X = i;
+        c.Y = 5;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 37;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 1;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //yellow spot at top right
+    {
+        c.X = 38;
+        c.Y = 2;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 52; ++i) //yellow spot at top right
+    {
+        c.X = 51;
+        c.Y = 0;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 60; ++i) //yellow spot at top right
+    {
+        c.X = 57;
+        c.Y = 1;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //top right lines
+    {
+        c.X = 47;
+        c.Y = 6;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 30;
+        c.Y = 10;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 36;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 11;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 19;
+        c.Y = 5;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 26;
+        c.Y = 2;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
 
+    for (int i = 0; i < 50; ++i) //scattered yellow spot
+    {
+        c.X = 43;
+        c.Y = 7;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 50;
+        c.Y = 9;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 63;
+        c.Y = 16;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 65; ++i) //scattered yellow spot
+    {
+        c.X = 30;
+        c.Y = 21;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 60; i < 62; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 23;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 44; i < 53; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 22;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 42; i < 54; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 21;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 42; i < 54; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 20;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 43; i < 55; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 19;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 45; i < 51; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 18;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 48; i < 50; ++i) //bottom right lines
+    {
+        c.X = i;
+        c.Y = 17;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 8; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 10;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 6; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 11;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 2; ++i) //top right lines
+    {
+        c.X = i;
+        c.Y = 12;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+
+    for (int i = 0; i < 13; ++i) //bottom left lines
+    {
+        c.X = i;
+        c.Y = 19;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 0; i < 8; ++i) //bottom left lines
+    {
+        c.X = i;
+        c.Y = 18;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 53; i < 60; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 13;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 56; i < 59; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 12;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 56; i < 60; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 15;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
+    for (int i = 52; i < 62; ++i) //mid right lines
+    {
+        c.X = i;
+        c.Y = 14;
+        colour(colors[1]);
+        g_Console.writeToBuffer(c, "  ", colors[1]);
+    }
     
 }
 
