@@ -19,7 +19,7 @@ SMouseEvent g_mouseEvent;
 
 // Game specific variables here
 SGameChar      g_sChar;
-SGameCrop      g_sCrops[20];
+//SGameCrop      g_sCrops[20];
 SGameSpiders   g_sSpiders;
 EGAMESTATES    g_eGameState = S_SPLASHSCREEN; // initial state
 
@@ -51,13 +51,14 @@ void init(void)
     g_sSpiders.m_cLocation.X = (rand() % 68);
     g_sSpiders.m_cLocation.Y = (rand() % 22);
     g_sSpiders.m_bActive = true;
-
+    /*
     for (int i = 0; i < 20; i++) 
     {
         g_sCrops[i].m_cLocation.X = (rand() % 68);
         g_sCrops[i].m_cLocation.Y = (rand() % 22);
         g_sCrops[i].m_bActive = true;
     }
+    */
     //sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
 
@@ -258,10 +259,10 @@ void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     moveCharacter();    // moves the character, collision detection, physics, etc
-    UpdateCrops();                 // sound can be played here too.
+   // UpdateCrops();                 // sound can be played here too.
 }
 
-
+/*
 void UpdateCrops() 
 {
     for (int i = 0; i < 20; i++) 
@@ -271,7 +272,7 @@ void UpdateCrops()
     }
 
 }
-
+*/
 
 void moveCharacter()
 {
@@ -401,7 +402,7 @@ void renderGame()
 {
    
     renderMap();        // renders the map to the buffer first
-    renderCrops();      // renders the mobs into the buffer
+ //   renderCrops();      // renders the mobs into the buffer
     renderSpiders();    // renders spiders into the buffer next
     renderCharacter();  // renders the character into the buffer
 
@@ -519,7 +520,7 @@ void renderguide()
 
 }
 
-
+/*
 void renderCrops()
 {
     // Draw the location of the spiders
@@ -528,7 +529,7 @@ void renderCrops()
         g_Console.writeToBuffer(g_sCrops[i].m_cLocation, (char)1, 12);
     }
 }
-
+*/
 
 void renderSpiders()
 {
@@ -553,301 +554,392 @@ void renderCharacter()
 }
 
 
-
 void renderMap()
 {
-
+    // if you code right it appears at bottom, code left appears top
     // Set up sample colours, and output shadings
-    const WORD colors[] = {
-        32, 130 //32 for green, 130 gray, 110 yellow
+    const WORD colors[80][25] = {
+32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32, 32,132,132,132, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32, 132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32, 132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	132,132,132,132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	132,132,132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	132,132,132,32, 32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32,	32,
+32,	132,132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32, 32,
+32,	132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32, 32,
+32,	32,132, 32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32, 32,
+32,	32, 32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,32,	32,
+32,	32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	132,32,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32, 32,	32,	32, 32,
+32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32, 32,
+32,	32,	32,	132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32, 32,
+32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32
+
+
     };
 
-    COORD c;
-    for (int i = 0; i < 50; ++i) //green bg
+    for (int x = 0; x < 80; x++)
     {
-        for (int r = 0; r < i; ++r)
-        {
-            c.X = r;
-            c.Y = i;
-            colour(colors[0]);
-            g_Console.writeToBuffer(c, "  ", colors[0]);
-        }
-    }
-    for (int i = 0; i < 80; ++i) //green bg
-    {
-        for (int r = 0; r < i; ++r)
-        {
-            c.X = i;
-            c.Y = r;
-            colour(colors[0]);
-            g_Console.writeToBuffer(c, "  ", colors[0]);
-        }
-    }
-    for (int i = 20; i < 50; ++i) //yellow bottom left 
-    {
-        for (int r = 0; r < i; ++r)
-        {
-            c.X = r;
-            c.Y = i;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
+        for (int y = 0; y < 25; y++) {
+            COORD c;
+            c.X = x;
+            c.Y = y;
+            g_Console.writeToBuffer(c, "  ", colors[x][y]);
         }
 
     }
-    for (int i = 40; i < 50; ++i) //yellowish top right
-    {
-        for (int r = 0; r < 5; ++r)
-        {
-            c.X = i;
-            c.Y = r;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-    }
-    for (int i = 0; i < 10; ++i) //yellow top left
-    {
-        for (int r = 0; r < i; ++r)
-        {
-            c.X = r;
-            c.Y = i;
-            colour(colors[1]);
-            g_Console.writeToBuffer(c, "  ", colors[1]);
-        }
-    }
-    for (int i = 44; i < 50; ++i) //top right line
-    {
-        c.X = i;
-        c.Y = 5;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //yellow spot at top right
-    {
-        c.X = 37;
-        c.Y = 0;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //yellow spot at top right
-    {
-        c.X = 38;
-        c.Y = 0;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //yellow spot at top right
-    {
-        c.X = 38;
-        c.Y = 1;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //yellow spot at top right
-    {
-        c.X = 38;
-        c.Y = 2;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 52; ++i) //yellow spot at top right
-    {
-        c.X = 51;
-        c.Y = 0;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 60; ++i) //yellow spot at top right
-    {
-        c.X = 57;
-        c.Y = 1;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //top right lines
-    {
-        c.X = 47;
-        c.Y = 6;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //scattered yellow spot
-    {
-        c.X = 30;
-        c.Y = 10;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //scattered yellow spot
-    {
-        c.X = 36;
-        c.Y = 14;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //scattered yellow spot
-    {
-        c.X = 11;
-        c.Y = 14;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //scattered yellow spot
-    {
-        c.X = 19;
-        c.Y = 5;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 50; ++i) //scattered yellow spot
-    {
-        c.X = 26;
-        c.Y = 2;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
 
-    for (int i = 0; i < 50; ++i) //scattered yellow spot
-    {
-        c.X = 43;
-        c.Y = 7;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
+    //COORD c;
+    //for (int i = 0; i < 50; ++i) //green bg
+    //{
+    //    for (int r = 0; r < i; ++r)
+    //    {
+    //        c.X = r;
+    //        c.Y = i;
+    //        colour(colors[0]);
+    //        g_Console.writeToBuffer(c, "  ", colors[0]);
+    //    }
+    //}
+    //for (int i = 0; i < 80; ++i) //green bg
+    //{
+    //    for (int r = 0; r < i; ++r)
+    //    {
+    //        c.X = i;
+    //        c.Y = r;
+    //        colour(colors[0]);
+    //        g_Console.writeToBuffer(c, "  ", colors[0]);
+    //    }
+    //}
+    //for (int i = 20; i < 50; ++i) //yellow bottom left 
+    //{
+    //    for (int r = 0; r < i; ++r)
+    //    {
+    //        c.X = r;
+    //        c.Y = i;
+    //        colour(colors[1]);
+    //        g_Console.writeToBuffer(c, "  ", colors[1]);
+    //    }
 
-    for (int i = 0; i < 65; ++i) //scattered yellow spot
-    {
-        c.X = 50;
-        c.Y = 9;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 65; ++i) //scattered yellow spot
-    {
-        c.X = 63;
-        c.Y = 16;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 65; ++i) //scattered yellow spot
-    {
-        c.X = 30;
-        c.Y = 21;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 60; i < 62; ++i) //bottom right lines
-    {
-        c.X = i;
-        c.Y = 23;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 44; i < 53; ++i) //bottom right lines
-    {
-        c.X = i;
-        c.Y = 22;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 42; i < 54; ++i) //bottom right lines
-    {
-        c.X = i;
-        c.Y = 21;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 42; i < 54; ++i) //bottom right lines
-    {
-        c.X = i;
-        c.Y = 20;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 43; i < 55; ++i) //bottom right lines
-    {
-        c.X = i;
-        c.Y = 19;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 45; i < 51; ++i) //bottom right lines
-    {
-        c.X = i;
-        c.Y = 18;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 48; i < 50; ++i) //bottom right lines
-    {
-        c.X = i;
-        c.Y = 17;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 8; ++i) //top right lines
-    {
-        c.X = i;
-        c.Y = 10;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 6; ++i) //top right lines
-    {
-        c.X = i;
-        c.Y = 11;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 2; ++i) //top right lines
-    {
-        c.X = i;
-        c.Y = 12;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
+    //}
+    //for (int i = 40; i < 50; ++i) //yellowish top right
+    //{
+    //    for (int r = 0; r < 5; ++r)
+    //    {
+    //        c.X = i;
+    //        c.Y = r;
+    //        colour(colors[1]);
+    //        g_Console.writeToBuffer(c, "  ", colors[1]);
+    //    }
+    //}
+    //for (int i = 0; i < 10; ++i) //yellow top left
+    //{
+    //    for (int r = 0; r < i; ++r)
+    //    {
+    //        c.X = r;
+    //        c.Y = i;
+    //        colour(colors[1]);
+    //        g_Console.writeToBuffer(c, "  ", colors[1]);
+    //    }
+    //}
+    //for (int i = 44; i < 50; ++i) //top right line
+    //{
+    //    c.X = i;
+    //    c.Y = 5;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //yellow spot at top right
+    //{
+    //    c.X = 37;
+    //    c.Y = 0;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //yellow spot at top right
+    //{
+    //    c.X = 38;
+    //    c.Y = 0;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //yellow spot at top right
+    //{
+    //    c.X = 38;
+    //    c.Y = 1;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //yellow spot at top right
+    //{
+    //    c.X = 38;
+    //    c.Y = 2;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 52; ++i) //yellow spot at top right
+    //{
+    //    c.X = 51;
+    //    c.Y = 0;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 60; ++i) //yellow spot at top right
+    //{
+    //    c.X = 57;
+    //    c.Y = 1;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //top right lines
+    //{
+    //    c.X = 47;
+    //    c.Y = 6;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //scattered yellow spot
+    //{
+    //    c.X = 30;
+    //    c.Y = 10;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //scattered yellow spot
+    //{
+    //    c.X = 36;
+    //    c.Y = 14;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //scattered yellow spot
+    //{
+    //    c.X = 11;
+    //    c.Y = 14;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //scattered yellow spot
+    //{
+    //    c.X = 19;
+    //    c.Y = 5;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 50; ++i) //scattered yellow spot
+    //{
+    //    c.X = 26;
+    //    c.Y = 2;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
 
-    for (int i = 0; i < 13; ++i) //bottom left lines
-    {
-        c.X = i;
-        c.Y = 19;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 0; i < 8; ++i) //bottom left lines
-    {
-        c.X = i;
-        c.Y = 18;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 53; i < 60; ++i) //mid right lines
-    {
-        c.X = i;
-        c.Y = 13;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 56; i < 59; ++i) //mid right lines
-    {
-        c.X = i;
-        c.Y = 12;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 56; i < 60; ++i) //mid right lines
-    {
-        c.X = i;
-        c.Y = 15;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
-    for (int i = 52; i < 62; ++i) //mid right lines
-    {
-        c.X = i;
-        c.Y = 14;
-        colour(colors[1]);
-        g_Console.writeToBuffer(c, "  ", colors[1]);
-    }
+    //for (int i = 0; i < 50; ++i) //scattered yellow spot
+    //{
+    //    c.X = 43;
+    //    c.Y = 7;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+
+    //for (int i = 0; i < 65; ++i) //scattered yellow spot
+    //{
+    //    c.X = 50;
+    //    c.Y = 9;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 65; ++i) //scattered yellow spot
+    //{
+    //    c.X = 63;
+    //    c.Y = 16;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 65; ++i) //scattered yellow spot
+    //{
+    //    c.X = 30;
+    //    c.Y = 21;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 60; i < 62; ++i) //bottom right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 23;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 44; i < 53; ++i) //bottom right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 22;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 42; i < 54; ++i) //bottom right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 21;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 42; i < 54; ++i) //bottom right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 20;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 43; i < 55; ++i) //bottom right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 19;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 45; i < 51; ++i) //bottom right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 18;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 48; i < 50; ++i) //bottom right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 17;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 8; ++i) //top right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 10;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 6; ++i) //top right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 11;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 2; ++i) //top right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 12;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+
+    //for (int i = 0; i < 13; ++i) //bottom left lines
+    //{
+    //    c.X = i;
+    //    c.Y = 19;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 0; i < 8; ++i) //bottom left lines
+    //{
+    //    c.X = i;
+    //    c.Y = 18;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 53; i < 60; ++i) //mid right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 13;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 56; i < 59; ++i) //mid right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 12;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 56; i < 60; ++i) //mid right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 15;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
+    //for (int i = 52; i < 62; ++i) //mid right lines
+    //{
+    //    c.X = i;
+    //    c.Y = 14;
+    //    colour(colors[1]);
+    //    g_Console.writeToBuffer(c, "  ", colors[1]);
+    //}
 
 }
 
