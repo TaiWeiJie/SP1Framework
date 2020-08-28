@@ -60,6 +60,20 @@ struct SGameCrop
     
 };
 
+struct SGameSpider
+{
+    COORD m_cLocation;
+    bool  m_bActive;
+
+};
+
+struct DIRECTION {
+    bool up;
+    bool down;
+    bool left;
+    bool right;
+};
+
 void init        ( void );      // initialize your variables, allocate memory, etc
 void getInput    ( void );      // get input from player
 void update      ( double dt ); // update the game and the state of the game
@@ -67,6 +81,7 @@ void render      ( void );      // renders the current state of the game to the 
 void shutdown    ( void );      // do clean up, free memory
 void splashScreenWait();    // waits for time to pass in splash screen
 void updateGame();          // gameplay logic
+void MoveInput();
 void moveCharacter();       // moves the character, collision detection, physics, etc
 void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
 void clearScreen();         // clears the current screen and draw from scratch 
@@ -74,12 +89,14 @@ void renderSplashScreen();  // renders the splash screen
 void renderGame();          // renders the game stuff
 void renderMap();           // renders the map to the buffer first
 void renderCharacter();     // renders the character into the buffer
+void renderTimer();
 void renderCrops();
-void renderFramerate();     // renders debug information, frame rate, elapsed time, etc
+void renderSpiders();
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 void updateguide();         // Updates guide
 void updatemenu();          // Updates Menu
+void UpdateCrops();
 void renderguide();         // renders How To Play Screen
 void GuideInput();          // Check for inputs in How To Play screen
 void rendermenu();          // Renders the menu screen
