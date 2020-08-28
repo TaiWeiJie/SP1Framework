@@ -74,6 +74,7 @@ void render(void);      // renders the current state of the game to the console
 void shutdown(void);      // do clean up, free memory
 void splashScreenWait();    // waits for time to pass in splash screen
 void updateGame();          // gameplay logic
+// void MoveInput();
 void moveCharacter();       // moves the character, collision detection, physics, etc
 void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
 void clearScreen();         // clears the current screen and draw from scratch 
@@ -81,18 +82,25 @@ void renderSplashScreen();  // renders the splash screen
 void renderGame();          // renders the game stuff
 void renderMap();           // renders the map to the buffer first
 void renderCharacter();     // renders the character into the buffer
-void UpdateCrops();
 void renderCrops();         // renders crops into the buffer
+// void UpdateCrops();
 void renderSpiders();       // renders spiders into the buffer
 void renderFramerate();     // renders debug information, frame rate, elapsed time, etc
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 void updateguide();         // Updates guide
 void updatemenu();          // Updates Menu
+void updateLosingscreen();
+void LoseInput();
+void renderLosingscreen();
+void updateWinscreen();
+void WinInput();
+void renderWinscreen();
 void renderguide();         // renders How To Play Screen
 void GuideInput();          // Check for inputs in How To Play screen
 void rendermenu();          // Renders the menu screen
 void MenuInput();           // Check for inputs in main menu
+
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
