@@ -14,18 +14,20 @@
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
+double EnemyUpdateRate = 0.0;
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 // Game specific variables here
 SGameChar   g_sChar;
 SGameCrop   g_sCrops[20];
-SGameSpider g_sSpiders[4];
-DIRECTION   direction;
+SGameSpider g_sSpiders[15];
+//DIRECTION   direction;
 EGAMESTATES g_eGameState = S_MENU; // initial state
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
+int limiter = 0;
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -46,7 +48,7 @@ void init( void )
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
     g_sChar.m_bActive = true;
     
-    for (int i = 0; i < 20; i++)
+    /*for (int i = 0; i < 20; i++)
     {
         g_sCrops[i].m_cLocation.X = (rand() % 68);
         g_sCrops[i].m_cLocation.Y = (rand() % 22);
@@ -58,7 +60,7 @@ void init( void )
         g_sSpiders[i].m_cLocation.X = (rand() % 68);
         g_sSpiders[i].m_cLocation.Y = (rand() % 22);
         g_sSpiders[i].m_bActive = true;
-    }
+    }*/
 
     //sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
@@ -156,6 +158,10 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
         break;
     case S_MENU: gameplayMouseHandler(mouseEvent);
         break;
+    case S_LOSESCREEN: gameplayMouseHandler(mouseEvent);
+        break;
+    case S_WINSCREEN: gameplayMouseHandler(mouseEvent);
+        break;
     }
 }
 
@@ -236,8 +242,17 @@ void update(double dt)
     {
         // get the delta time
         g_dElapsedTime += dt;
+        g_dDeltaTime = dt;
     }
     else if (g_eGameState == S_MENU)
+    {
+        g_dElapsedTime = 0;
+    }
+    else if (g_eGameState == S_WINSCREEN)
+    {
+        g_dElapsedTime = 0;
+    }
+    else if (g_eGameState == S_LOSESCREEN)
     {
         g_dElapsedTime = 0;
     }
@@ -251,6 +266,11 @@ void update(double dt)
         case S_GUIDE: updateguide(); // logic for how to play screen
             break;
         case S_MENU: updatemenu();   // logic for menu
+            break;
+        case S_LOSESCREEN: updateLosingscreen();
+            break;
+        case S_WINSCREEN: updateWinscreen();
+            break;
     }
 
 }
@@ -268,79 +288,77 @@ void splashScreenWait()    // waits for time to pass in splash screen
 void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
-    MoveInput();        // checks for move input
     moveCharacter();    // moves the character, collision detection, physics, etc
-                        // sound can be played here too.
+    UpdateCrops();
+    UpdateSpiders();
+    spiderMovement();                    // sound can be played here too.
 }
 
 void UpdateCrops()
 {
-    for (int i = 0; i < 20; i++)
+    for (int i = 0; i < 20; i++) 
     {
-        g_sCrops[i].m_cLocation.X;
-        g_sCrops[i].m_cLocation.Y;
+        if (g_sChar.m_cLocation.X == g_sCrops[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sCrops[i].m_cLocation.Y && g_sCrops[i].m_bActive == true)
+        {
+            Beep(1440, 30);
+            g_sCrops[i].m_bActive = false;
+        }
     }
 
+    if (g_sCrops[0].m_bActive == false && g_sCrops[1].m_bActive == false && g_sCrops[2].m_bActive == false && g_sCrops[3].m_bActive == false && g_sCrops[4].m_bActive == false
+        && g_sCrops[5].m_bActive == false && g_sCrops[6].m_bActive == false && g_sCrops[7].m_bActive == false && g_sCrops[8].m_bActive == false && g_sCrops[9].m_bActive == false
+        && g_sCrops[10].m_bActive == false && g_sCrops[11].m_bActive == false && g_sCrops[12].m_bActive == false && g_sCrops[13].m_bActive == false && g_sCrops[14].m_bActive == false
+        && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
+        )
+        g_eGameState = S_WINSCREEN;
+      
 }
 
-void MoveInput()
+void UpdateSpiders()
 {
-    // Updating the location of the character based on the key release
-    // providing a beep sound whenver we shift the character
-    if (g_skKeyEvent[K_UP].keyDown)
+    for (int i = 0; i < 15; i++)
     {
-        direction.up = true;
+        if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == true)
+        {
+            g_eGameState = S_LOSESCREEN;
+        }
     }
-    if (g_skKeyEvent[K_LEFT].keyDown )
-    {
-        direction.left = true;
-    }
-    if (g_skKeyEvent[K_DOWN].keyDown)
-    {
-        direction.down = true;
-    }
-    if (g_skKeyEvent[K_RIGHT].keyDown )
-    {
-        direction.right = true;
-    }
-    if (g_skKeyEvent[K_UP].keyReleased)
-    {
-        direction.up = false;
-    }
-    if (g_skKeyEvent[K_LEFT].keyReleased)
-    {
-        direction.left = false;
-    }
-    if (g_skKeyEvent[K_DOWN].keyReleased)
-    {
-        direction.down = false;
-    }
-    if (g_skKeyEvent[K_RIGHT].keyReleased)
-    {
-        direction.right = false;
-    }
+}
+
+void updateLosingscreen()
+{
+    LoseInput();
+    renderLosingscreen();
+}
+
+void updateWinscreen()
+{
+    WinInput();
+    renderWinscreen();
 }
 
 void moveCharacter()
 {    
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (direction.up == true && g_sChar.m_cLocation.Y > 0)
+    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0 && g_dDeltaTime > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y--;       
+        g_sChar.m_cLocation.Y--;
     }
-    if (direction.left == true && g_sChar.m_cLocation.X > 0)
+    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X--;        
     }
-    if (direction.down == true && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
+    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y++;        
     }
-    if (direction.right == true && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.X++;        
@@ -349,9 +367,19 @@ void moveCharacter()
     {
         g_sChar.m_bActive = !g_sChar.m_bActive;        
     }
-
    
 }
+
+//void PlayerLimiter()
+//{
+//    playerUpdateRate += g_dDeltaTime;
+//    if (playerUpdateRate > 2)
+//    {
+//        moveCharacter();
+//        playerUpdateRate = 0.0;
+//    }
+//}
+
 void processUserInput()
 {
     // quits the game if player hits the escape key
@@ -389,9 +417,85 @@ void MenuInput()
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
+
+        for (int i = 0; i < 20; i++)
+        {
+            g_sCrops[i].m_cLocation.X = (rand() % 68);
+            g_sCrops[i].m_cLocation.Y = (rand() % 22);
+            g_sCrops[i].m_bActive = true;
+        }
+
+        for (int i = 0; i < 15; i++)
+        {
+            g_sSpiders[i].m_cLocation.X = (rand() % 68);
+            g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+            g_sSpiders[i].m_bActive = true;
+        }
     }
 }
 
+void LoseInput()
+{
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GAME;
+        if (g_eGameState = S_GAME)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++) 
+            {
+                g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+            }
+            
+            for (int i = 0; i < 20; i++)
+            {
+                g_sCrops[i].m_cLocation.X = (rand() % 64);
+                g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                g_sCrops[i].m_bActive = true;
+            }
+
+        }
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+
+
+}
+
+void WinInput()
+{
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GAME;
+        if (g_eGameState = S_GAME)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                g_sCrops[i].m_cLocation.X = (rand() % 64);
+                g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                g_sCrops[i].m_bActive = true;
+            }
+     
+            g_sChar.m_bActive = true;
+
+        }
+    }
+}
 //--------------------------------------------------------------
 // Purpose  : Render function is to update the console screen
 //            At this point, you should know exactly what to draw onto the screen.
@@ -413,27 +517,80 @@ void render()
         break;
     case S_MENU: rendermenu();
         break;
+    case S_LOSESCREEN: renderLosingscreen();
+        break;
+    case S_WINSCREEN: renderWinscreen();
+        break;
     }
 
-    //renderTimer();
+    
     renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
 
 void renderTimer()
 {
-  
+    
+
     COORD c;
     // displays the time
     std::ostringstream ss;
     ss << std::fixed << std::setprecision(3);
     ss.str("");
     ss << g_dElapsedTime << "secs";
-    c.X = 35;
+    c.X = 70;
     c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str(), 0x59);
+    g_Console.writeToBuffer(c, ss.str(), 46);
+
+    if (g_dElapsedTime > 10.0)
+        g_Console.writeToBuffer(c, ss.str(), 44);
     
+ 
 }
+
+void spiderMovement()
+{
+    for (int i = 0; i < 15; i++)
+    {
+        EnemyUpdateRate += g_dDeltaTime;
+        int random = rand() % 8 + 1;
+        switch (random)
+        {
+
+        case 1:
+            if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.X++;
+                EnemyUpdateRate = 0;
+            }
+            break;
+        case 2:
+            if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.Y++;
+                EnemyUpdateRate = 0;
+            }
+            break;
+        case 3:
+            if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.X--;
+                EnemyUpdateRate = 0;
+            }
+            break;
+        case 4:
+            if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.Y--;
+                EnemyUpdateRate = 0;
+            }
+            break;
+
+        }
+
+    }
+}
+
 
 void clearScreen()
 {
@@ -525,11 +682,98 @@ void rendermenu()
     }
 }
 
+void renderLosingscreen()
+{
+    const WORD colors[] = {
+    9,26,20,22,31,
+    };
+
+    COORD c;
+
+    c.X = 33;
+    c.Y = 5;
+    colour(colors[4]);
+    g_Console.writeToBuffer(c, "YOU DIED", colors[4]);
+
+    c.X = 32;
+    c.Y = 11;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "Play again", colors[4]);
+
+    c.X = 31;
+    c.Y = 13;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "Back to menu", colors[4]);
+
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44)
+    {
+        c.X = 32;
+        c.Y = 11;
+        colour(colors[3]);
+        g_Console.writeToBuffer(c, "Play  again", colors[3]);
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 29 && g_mouseEvent.mousePosition.X < 44)
+    {
+        c.X = 31;
+        c.Y = 13;
+        colour(colors[3]);
+        g_Console.writeToBuffer(c, "Back  to  menu", colors[3]);
+    }
+
+}
+
+void renderWinscreen()
+{
+    {
+        const WORD colors[] = {
+        9,26,20,22,31,
+        };
+
+        COORD c;
+
+        c.X = 33;
+        c.Y = 5;
+        colour(colors[4]);
+        g_Console.writeToBuffer(c, "YOU WIN", colors[4]);
+
+        c.X = 32;
+        c.Y = 11;
+        colour(colors[0]);
+        g_Console.writeToBuffer(c, "Play again", colors[4]);
+
+        c.X = 29;
+        c.Y = 13;
+        colour(colors[0]);
+        g_Console.writeToBuffer(c, "Go to next level", colors[4]);
+
+        if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44)
+        {
+            c.X = 32;
+            c.Y = 11;
+            colour(colors[3]);
+            g_Console.writeToBuffer(c, "Play  again", colors[3]);
+        }
+
+        if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44)
+        {
+            c.X = 29;
+            c.Y = 13;
+            colour(colors[3]);
+            g_Console.writeToBuffer(c, "Go to next level", colors[3]);
+        }
+
+    }
+}
+
+
 void updatemenu()
 {
     MenuInput();
     rendermenu();
 }
+
+
 
 void updateguide()
 {
@@ -585,9 +829,14 @@ void renderguide()
 void renderCrops()
 {
     // Draw the location of the spiders
+
     for (int i = 0; i < 20; i++)
     {
-        g_Console.writeToBuffer(g_sCrops[i].m_cLocation, (char)1, 110);
+        g_Console.writeToBuffer(g_sCrops[i].m_cLocation, (char)10, 110);
+        if (g_sCrops[i].m_bActive == false)
+        {
+            g_Console.writeToBuffer(g_sCrops[i].m_cLocation, (char)10, 46);
+        }
     }
 }
 
@@ -595,9 +844,9 @@ void renderCrops()
 void renderSpiders()
 {
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 15; i++)
     {
-        g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)1, 10);
+        g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)31, 7);
     }
 }
 
@@ -612,10 +861,6 @@ void renderCharacter()
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, charColor);
 }
 
-//void limiter()
-//{
-//    double delay = g_dElapsedTime;
-//}
 
 void renderMap()
 {
