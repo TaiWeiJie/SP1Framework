@@ -48,19 +48,6 @@ void init(void)
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
     g_sChar.m_bActive = true;
 
-    /*for (int i = 0; i < 20; i++)
-    {
-        g_sCrops[i].m_cLocation.X = (rand() % 68);
-        g_sCrops[i].m_cLocation.Y = (rand() % 22);
-        g_sCrops[i].m_bActive = true;
-    }
-    for (int i = 0; i < 4; i++)
-    {
-        g_sSpiders[i].m_cLocation.X = (rand() % 68);
-        g_sSpiders[i].m_cLocation.Y = (rand() % 22);
-        g_sSpiders[i].m_bActive = true;
-    }*/
-
     //sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
 
@@ -103,7 +90,7 @@ void getInput(void)
     memset(g_skKeyEvent, 0, K_COUNT * sizeof(*g_skKeyEvent));
     // then call the console to detect input from user
     g_Console.readConsoleInput();
-}
+}  
 
 //--------------------------------------------------------------
 // Purpose  : This is the handler for the keyboard input. Whenever there is a keyboard event, this function will be called.
@@ -325,7 +312,7 @@ void UpdateCrops()
 
 void UpdatePestcontroltimer()
 {
-    if (g_dElapsedTime > 40.0)
+    if (g_dElapsedTime > 50.0)
     { 
         g_eGameState = S_PESTCONTROLSCREEN;
     }
@@ -347,7 +334,7 @@ void UpdateSpiders()
 
 void updateLosingscreen()
 {
-    LoseInput();
+    LoseInput(); 
     renderLosingscreen();
 }
 
@@ -430,6 +417,7 @@ void MenuInput()
     {
         g_bQuitGame = true;
     }
+
     // displays guide for game (Not functional yet)
     if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 33 && g_mouseEvent.mousePosition.X < 44 &&
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
@@ -460,7 +448,7 @@ void MenuInput()
 
 void LoseInput()
 {
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44 &&
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
@@ -480,22 +468,21 @@ void LoseInput()
                 g_sCrops[i].m_cLocation.Y = (rand() % 22);
                 g_sCrops[i].m_bActive = true;
             }
-
         }
     }
 
-    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44 &&
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_MENU;
-    }
+    }  
 
 
 }
 
 void WinInput()
 {
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44 &&
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
@@ -519,11 +506,18 @@ void WinInput()
 
         }
     }
+
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+
 }
 
 void PestControlinput() 
 {
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44 &&
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
@@ -546,7 +540,7 @@ void PestControlinput()
         
     }
 
-    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44 &&
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_MENU;
@@ -603,7 +597,7 @@ void renderTimer()
 
     if (g_dElapsedTime > 30.0) 
         g_Console.writeToBuffer(c, ss.str(), 44);
-
+    
 
 }
 
@@ -617,28 +611,28 @@ void spiderMovement()
         {
 
         case 1:
-            if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.4)
+            if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.3)
             {
                 g_sSpiders[i].m_cLocation.X++;
                 EnemyUpdateRate = 0;
             }
             break;
         case 2:
-            if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.4)
+            if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.3)
             {
                 g_sSpiders[i].m_cLocation.Y++;
                 EnemyUpdateRate = 0;
             }
             break;
         case 3:
-            if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.4)
+            if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.3)
             {
                 g_sSpiders[i].m_cLocation.X--;
                 EnemyUpdateRate = 0;
             }
             break;
         case 4:
-            if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.4)
+            if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.3)
             {
                 g_sSpiders[i].m_cLocation.Y--;
                 EnemyUpdateRate = 0;
@@ -654,7 +648,7 @@ void spiderMovement()
 void clearScreen()
 {
     // Clears the buffer with this colour attribute
-    g_Console.clearBuffer(0x1F);
+    g_Console.clearBuffer(0x0F);
 }
 
 void renderToScreen()
@@ -698,22 +692,22 @@ void rendermenu()
     c.X = 33;
     c.Y = 5;
     colour(colors[4]);
-    g_Console.writeToBuffer(c, "LOCUST RUSH", colors[4]);
+    g_Console.writeToBuffer(c, "LOCUST RUSH", colors[0]);
 
     c.X = 36;
     c.Y = 9;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "Start", colors[4]);
+    g_Console.writeToBuffer(c, "Start", colors[0]);
 
     c.X = 33;
     c.Y = 11;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "How to Play", colors[4]);
+    g_Console.writeToBuffer(c, "How to Play", colors[0]);
 
     c.X = 37;
     c.Y = 13;
     colour(colors[4]);
-    g_Console.writeToBuffer(c, "Quit", colors[4]);
+    g_Console.writeToBuffer(c, "Quit", colors[0]);
 
     //color change when mouse is over buttons
     if (g_mouseEvent.mousePosition.Y == 9 && g_mouseEvent.mousePosition.X >= 36 && g_mouseEvent.mousePosition.X < 41)
@@ -752,32 +746,32 @@ void renderLosingscreen()
     c.X = 33;
     c.Y = 5;
     colour(colors[4]);
-    g_Console.writeToBuffer(c, "YOU DIED", colors[4]);
+    g_Console.writeToBuffer(c, "YOU DIED", colors[0]);
 
     c.X = 32;
     c.Y = 11;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "Play again", colors[4]);
+    g_Console.writeToBuffer(c, "Play again", colors[0]);
 
     c.X = 31;
-    c.Y = 13;
+    c.Y = 14;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "Back to menu", colors[4]);
+    g_Console.writeToBuffer(c, "Back to menu", colors[0]);
 
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44)
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
     {
         c.X = 32;
         c.Y = 11;
         colour(colors[3]);
-        g_Console.writeToBuffer(c, "Play  again", colors[3]);
+        g_Console.writeToBuffer(c, "Play again", colors[3]);
     }
 
-    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 29 && g_mouseEvent.mousePosition.X < 44)
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
     {
         c.X = 31;
-        c.Y = 13;
+        c.Y = 14;
         colour(colors[3]);
-        g_Console.writeToBuffer(c, "Back  to  menu", colors[3]);
+        g_Console.writeToBuffer(c, "Back to menu", colors[3]);
     }
 
 }
@@ -794,32 +788,32 @@ void renderWinscreen()
         c.X = 33;
         c.Y = 5;
         colour(colors[4]);
-        g_Console.writeToBuffer(c, "YOU WIN", colors[4]);
+        g_Console.writeToBuffer(c, "YOU WIN", colors[0]);
 
         c.X = 32;
         c.Y = 11;
         colour(colors[0]);
-        g_Console.writeToBuffer(c, "Play again", colors[4]);
+        g_Console.writeToBuffer(c, "Play again", colors[0]);
 
-        c.X = 29;
-        c.Y = 13;
+        c.X = 31;
+        c.Y = 14;
         colour(colors[0]);
-        g_Console.writeToBuffer(c, "Go to next level", colors[4]);
+        g_Console.writeToBuffer(c, "Back to menu", colors[0]);
 
-        if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44)
+        if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
         {
             c.X = 32;
             c.Y = 11;
             colour(colors[3]);
-            g_Console.writeToBuffer(c, "Play  again", colors[3]);
+            g_Console.writeToBuffer(c, "Play again", colors[3]);
         }
 
-        if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44)
+        if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
         {
-            c.X = 29;
-            c.Y = 13;
+            c.X = 31;
+            c.Y = 14;
             colour(colors[3]);
-            g_Console.writeToBuffer(c, "Go to next level", colors[3]);
+            g_Console.writeToBuffer(c, "Back to menu", colors[3]);
         }
 
     }
@@ -833,35 +827,35 @@ void renderPestscreen()
     
     COORD c;
 
-    c.X = 33;
+    c.X = 25;
     c.Y = 5;
     colour(colors[4]);
-    g_Console.writeToBuffer(c, "PEST CONTROL", colors[4]);
+    g_Console.writeToBuffer(c, "PEST CONTROL HAS ARRIVED", colors[0]);
 
     c.X = 32;
     c.Y = 11;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "Play again", colors[4]);
+    g_Console.writeToBuffer(c, "Play again", colors[0]);
 
     c.X = 31;
-    c.Y = 13;
+    c.Y = 14;
     colour(colors[0]);
-    g_Console.writeToBuffer(c, "Back to menu", colors[4]);
+    g_Console.writeToBuffer(c, "Back to menu", colors[0]);
 
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44)
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
     {
         c.X = 32;
         c.Y = 11;
         colour(colors[3]);
-        g_Console.writeToBuffer(c, "Play  again", colors[3]);
+        g_Console.writeToBuffer(c, "Play again", colors[3]);
     }
 
-    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 29 && g_mouseEvent.mousePosition.X < 44)
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
     {
         c.X = 31;
-        c.Y = 13;
+        c.Y = 14;
         colour(colors[3]);
-        g_Console.writeToBuffer(c, "Back  to  menu", colors[3]);
+        g_Console.writeToBuffer(c, "Back to menu", colors[3]);
     }
 }
 
@@ -886,31 +880,31 @@ void renderguide()
     COORD c = g_Console.getConsoleSize();
     c.Y /= 7;
     c.X = c.X / 2 - 10;
-    g_Console.writeToBuffer(c, "==Controls==", 31);
+    g_Console.writeToBuffer(c, "==Controls==", 15);
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 9;
-    g_Console.writeToBuffer(c, "Arrow Keys", 31);
+    g_Console.writeToBuffer(c, "Arrow Keys", 15);
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 9;
-    g_Console.writeToBuffer(c, "WASD keys", 31);
+    g_Console.writeToBuffer(c, "WASD keys", 15);
     c.Y += 2;
     c.X = g_Console.getConsoleSize().X / 2 - 11;
-    g_Console.writeToBuffer(c, "==How to Play==", 31);
+    g_Console.writeToBuffer(c, "==How to Play==", 15);
     c.Y += 1;
     c.X = g_Console.getConsoleSize().X / 2 - 40;
-    g_Console.writeToBuffer(c, "Move your locust to a piece of farmland, it will solwly start to eat the crops.", 31);
+    g_Console.writeToBuffer(c, "Move your locust to a piece of farmland, it will solwly start to eat the crops.", 15);
     c.Y += 2;
     c.X = g_Console.getConsoleSize().X / 2 - 40;
-    g_Console.writeToBuffer(c, "By doing so, it will increase your locust population. The larger the population, the faster you consume crops.", 31);
+    g_Console.writeToBuffer(c, "By doing so, it will increase your locust population. The larger the population, the faster you consume crops.", 15);
     c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 40;
-    g_Console.writeToBuffer(c, "Watch out for predators, they will attack your locust population on close promixity. If your whole swarm is eaten, you will lose.", 31);
+    g_Console.writeToBuffer(c, "Watch out for predators, they will attack your locust population on close promixity. If your whole swarm is eaten, you will lose.", 15);
     c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 40;
-    g_Console.writeToBuffer(c, "Bewarned, increasing your locust population beyond (limit) will result in the pest control being called in, resulting in a defeat.", 31);
+    g_Console.writeToBuffer(c, "Bewarned, increasing your locust population beyond (limit) will result in the pest control being called in, resulting in a defeat.", 15);
     c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 40;
-    g_Console.writeToBuffer(c, "To win, the swarm must consume all the crops on the field in the shortest amount of time, without dying to either predators or pest control.", 31);
+    g_Console.writeToBuffer(c, "To win, the swarm must consume all the crops on the field in the shortest amount of time, without dying to either predators or pest control.", 15);
 
     c.X = 63;
     c.Y = 23;
