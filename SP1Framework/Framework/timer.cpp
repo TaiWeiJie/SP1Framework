@@ -5,14 +5,14 @@
 // Input    : Void
 // Output   : Nil
 //--------------------------------------------------------------
-CStopWatch::CStopWatch( void )
-{    
-    QueryPerformanceFrequency( &m_liFrequency ) ;
+CStopWatch::CStopWatch(void)
+{
+    QueryPerformanceFrequency(&m_liFrequency);
 
-    #define TARGET_RESOLUTION 1         // 1-millisecond target resolution
+#define TARGET_RESOLUTION 1         // 1-millisecond target resolution
     TIMECAPS tc;
 
-    if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) != TIMERR_NOERROR) 
+    if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) != TIMERR_NOERROR)
     {
         // Error; application can't continue.
     }
@@ -21,7 +21,7 @@ CStopWatch::CStopWatch( void )
 
     // requests a minimum resolution for periodic timers.
     // goto https://msdn.microsoft.com/en-us/library/windows/desktop/dd757624(v=vs.85).aspx for more info
-    timeBeginPeriod(m_uTimerRes); 
+    timeBeginPeriod(m_uTimerRes);
 }
 
 //--------------------------------------------------------------
@@ -29,7 +29,7 @@ CStopWatch::CStopWatch( void )
 // Input    : Void
 // Output   : Nil
 //--------------------------------------------------------------
-CStopWatch::~CStopWatch( void )
+CStopWatch::~CStopWatch(void)
 {
     // clear the resolution
     // goto https://msdn.microsoft.com/en-us/library/windows/desktop/dd757626(v=vs.85).aspx for more info
@@ -41,36 +41,36 @@ CStopWatch::~CStopWatch( void )
 // Input    : Long integer
 // Output   : Double
 //--------------------------------------------------------------
-double CStopWatch::LiToSecs( LARGE_INTEGER & liInput) {
-     return ((double)liInput.QuadPart /(double)m_liFrequency.QuadPart) ;
- }
- 
+double CStopWatch::LiToSecs(LARGE_INTEGER& liInput) {
+    return ((double)liInput.QuadPart / (double)m_liFrequency.QuadPart);
+}
+
 //--------------------------------------------------------------
 // Purpose  : Start the timer by getting current time and store
 // Input    : void
 // Output   : void
 //--------------------------------------------------------------
-void CStopWatch::startTimer( void )
+void CStopWatch::startTimer(void)
 {
-    QueryPerformanceCounter(&m_liPrevTime) ;
+    QueryPerformanceCounter(&m_liPrevTime);
 }
- 
+
 //--------------------------------------------------------------
 // Purpose  : Get the elapsed time by getting current time 
 //            and minus stored value
 // Input    : void
 // Output   : void
 //--------------------------------------------------------------
-double CStopWatch::getElapsedTime( void ) 
+double CStopWatch::getElapsedTime(void)
 {
     LARGE_INTEGER llTime;
     // obtain current time
-    QueryPerformanceCounter(&m_liCurrTime) ;
+    QueryPerformanceCounter(&m_liCurrTime);
     // Calculate elapsed time
     llTime.QuadPart = m_liCurrTime.QuadPart - m_liPrevTime.QuadPart;
     // Store current time for next elapsed time calculation
     m_liPrevTime = m_liCurrTime;
-    return LiToSecs( llTime) ;
+    return LiToSecs(llTime);
 }
 
 //--------------------------------------------------------------

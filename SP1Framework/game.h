@@ -42,10 +42,11 @@ enum EGAMESTATES
     S_SPLASHSCREEN,
     S_LOSESCREEN,
     S_WINSCREEN,
+    S_PESTCONTROLSCREEN,
     S_MENU,
     S_GUIDE,
     S_GAME,
-    S_COUNT
+    S_COUNT,
 };
 
 // struct for the game character
@@ -59,7 +60,7 @@ struct SGameCrop
 {
     COORD m_cLocation;
     bool  m_bActive;
-    
+
 };
 
 struct SGameSpider
@@ -69,7 +70,7 @@ struct SGameSpider
 
 };
 
-struct DIRECTION 
+struct DIRECTION
 {
     bool up;
     bool down;
@@ -77,11 +78,11 @@ struct DIRECTION
     bool right;
 };
 
-void init        ( void );      // initialize your variables, allocate memory, etc
-void getInput    ( void );      // get input from player
-void update      ( double dt ); // update the game and the state of the game
-void render      ( void );      // renders the current state of the game to the console
-void shutdown    ( void );      // do clean up, free memory
+void init(void);      // initialize your variables, allocate memory, etc
+void getInput(void);      // get input from player
+void update(double dt); // update the game and the state of the game
+void render(void);      // renders the current state of the game to the console
+void shutdown(void);      // do clean up, free memory
 void splashScreenWait();    // waits for time to pass in splash screen
 void updateGame();          // gameplay logic
 void spiderMovement();
@@ -103,14 +104,19 @@ void updateguide();         // Updates guide
 void updatemenu();          // Updates Menu
 void updateLosingscreen();
 void updateWinscreen();
-void UpdateSpiders();
+// void updatePrintscreen();
+void UpdateSpiders(); 
 void UpdateCrops();
+void UpdatePestcontroltimer(); 
 void renderguide();         // renders How To Play Screen
 void GuideInput();          // Check for inputs in How To Play screen
 void WinInput();
 void LoseInput();
-void renderLosingscreen();
+void PestControlinput(); 
+void updatePestcontrol(); 
+void renderLosingscreen(); 
 void renderWinscreen();
+void renderPestscreen();
 void rendermenu();          // Renders the menu screen
 void MenuInput();           // Check for inputs in main menu
 
