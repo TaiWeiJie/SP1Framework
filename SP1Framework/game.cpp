@@ -14,17 +14,20 @@
 
 double  g_dElapsedTime;
 double  g_dDeltaTime;
+double EnemyUpdateRate = 0.0;
 SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 // Game specific variables here
-SGameChar      g_sChar;
-//SGameCrop      g_sCrops[20];
-SGameSpiders   g_sSpiders;
-EGAMESTATES    g_eGameState = S_SPLASHSCREEN; // initial state
+SGameChar   g_sChar;
+SGameCrop   g_sCrops[20];
+SGameSpider g_sSpiders[15];
+//DIRECTION   direction;
+EGAMESTATES g_eGameState = S_MENU; // initial state
 
 // Console object
 Console g_Console(80, 25, "SP1 Framework");
+int limiter = 0;
 
 //--------------------------------------------------------------
 // Purpose  : Initialisation function
@@ -33,32 +36,32 @@ Console g_Console(80, 25, "SP1 Framework");
 // Input    : void
 // Output   : void
 //--------------------------------------------------------------
-void init(void)
+void init( void )
 {
     // Set precision for floating point output
-    g_dElapsedTime = 0.0;
+    g_dElapsedTime = 0.0;    
 
     // sets the initial state for the game
-    g_eGameState = S_SPLASHSCREEN;
-
+    g_eGameState = S_MENU;
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
     g_sChar.m_bActive = true;
-
-
-    srand((unsigned)time(0));
-    g_sSpiders.m_cLocation.X = (rand() % 68);
-    g_sSpiders.m_cLocation.Y = (rand() % 22);
-    g_sSpiders.m_bActive = true;
-    /*
-    for (int i = 0; i < 20; i++) 
+    
+    /*for (int i = 0; i < 20; i++)
     {
         g_sCrops[i].m_cLocation.X = (rand() % 68);
         g_sCrops[i].m_cLocation.Y = (rand() % 22);
         g_sCrops[i].m_bActive = true;
     }
-    */
+
+    for (int i = 0; i < 4; i++)
+    {
+        g_sSpiders[i].m_cLocation.X = (rand() % 68);
+        g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+        g_sSpiders[i].m_bActive = true;
+    }*/
+
     //sets the width, height and the font name to use in the console
     g_Console.setConsoleFont(0, 16, L"Consolas");
 
@@ -67,8 +70,6 @@ void init(void)
     g_Console.setMouseHandler(mouseHandler);
 }
 
-
-
 //--------------------------------------------------------------
 // Purpose  : Reset before exiting the program
 //            Do your clean up of memory here
@@ -76,7 +77,7 @@ void init(void)
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void shutdown(void)
+void shutdown( void )
 {
     // Reset to white text on black background
     colour(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
@@ -97,12 +98,12 @@ void shutdown(void)
 // Input    : Void
 // Output   : void
 //--------------------------------------------------------------
-void getInput(void)
+void getInput( void )
 {
     // resets all the keyboard events
     memset(g_skKeyEvent, 0, K_COUNT * sizeof(*g_skKeyEvent));
     // then call the console to detect input from user
-    g_Console.readConsoleInput();
+    g_Console.readConsoleInput();    
 }
 
 //--------------------------------------------------------------
@@ -119,7 +120,7 @@ void getInput(void)
 // Output   : void
 //--------------------------------------------------------------
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
-{
+{    
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: // don't handle anything for the splash screen
@@ -146,7 +147,7 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
 // Output   : void
 //--------------------------------------------------------------
 void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
-{
+{    
     switch (g_eGameState)
     {
     case S_SPLASHSCREEN: // don't handle anything for the splash screen
@@ -156,6 +157,10 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
     case S_GUIDE: gameplayMouseHandler(mouseEvent);
         break;
     case S_MENU: gameplayMouseHandler(mouseEvent);
+        break;
+    case S_LOSESCREEN: gameplayMouseHandler(mouseEvent);
+        break;
+    case S_WINSCREEN: gameplayMouseHandler(mouseEvent);
         break;
     }
 }
@@ -177,10 +182,10 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
     case VK_UP: key = K_UP; break;
     case VK_DOWN: key = K_DOWN; break;
-    case VK_LEFT: key = K_LEFT; break;
-    case VK_RIGHT: key = K_RIGHT; break;
+    case VK_LEFT: key = K_LEFT; break; 
+    case VK_RIGHT: key = K_RIGHT; break; 
     case VK_SPACE: key = K_SPACE; break;
-    case VK_ESCAPE: key = K_ESCAPE; break;
+    case VK_ESCAPE: key = K_ESCAPE; break; 
     case VK_W: key = K_UP; break;
     case VK_A: key = K_LEFT; break;
     case VK_S: key = K_DOWN; break;
@@ -194,7 +199,7 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent)
     {
         g_skKeyEvent[key].keyDown = keyboardEvent.bKeyDown;
         g_skKeyEvent[key].keyReleased = !keyboardEvent.bKeyDown;
-    }
+    }    
 }
 
 //--------------------------------------------------------------
@@ -232,20 +237,42 @@ void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
 //--------------------------------------------------------------
 void update(double dt)
 {
-    // get the delta time
-    g_dElapsedTime += dt;
-    g_dDeltaTime = dt;
+    //g_dDeltaTime = dt;
+    if (g_eGameState == S_GAME)
+    {
+        // get the delta time
+        g_dElapsedTime += dt;
+        g_dDeltaTime = dt;
+    }
+    else if (g_eGameState == S_MENU)
+    {
+        g_dElapsedTime = 0;
+    }
+    else if (g_eGameState == S_WINSCREEN)
+    {
+        g_dElapsedTime = 0;
+    }
+    else if (g_eGameState == S_LOSESCREEN)
+    {
+        g_dElapsedTime = 0;
+    }
 
     switch (g_eGameState)
     {
-    case S_SPLASHSCREEN: splashScreenWait(); // game logic for the splash screen
-        break;
-    case S_GAME: updateGame(); // gameplay logic when we are in the game
-        break;
-    case S_GUIDE: updateguide(); // logic for how to play screen
-        break;
-    case S_MENU: updatemenu();   // logic for menu
+        case S_SPLASHSCREEN : splashScreenWait(); // game logic for the splash screen
+            break;
+        case S_GAME: updateGame(); // gameplay logic when we are in the game
+            break;
+        case S_GUIDE: updateguide(); // logic for how to play screen
+            break;
+        case S_MENU: updatemenu();   // logic for menu
+            break;
+        case S_LOSESCREEN: updateLosingscreen();
+            break;
+        case S_WINSCREEN: updateWinscreen();
+            break;
     }
+
 }
 
 
@@ -253,32 +280,70 @@ void splashScreenWait()    // waits for time to pass in splash screen
 {
     if (g_dElapsedTime > 3.0) // wait for 3 seconds to switch to game mode, else do nothing
         g_eGameState = S_MENU;
+
+    //if(g_sChar.m_cLocation.X == g_sCrops.m_cLocation.X && g_sChar.m_cLocation.Y == g_sCrops.m_cLocation.Y)
+
 }
 
 void updateGame()       // gameplay logic
 {
     processUserInput(); // checks if you should change states or do something else with the game, e.g. pause, exit
     moveCharacter();    // moves the character, collision detection, physics, etc
-   // UpdateCrops();                 // sound can be played here too.
+    UpdateCrops();
+    UpdateSpiders();
+    spiderMovement();                    // sound can be played here too.
 }
 
-/*
-void UpdateCrops() 
+void UpdateCrops()
 {
     for (int i = 0; i < 20; i++) 
     {
-        g_sCrops[i].m_cLocation.X;
-        g_sCrops[i].m_cLocation.Y;
+        if (g_sChar.m_cLocation.X == g_sCrops[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sCrops[i].m_cLocation.Y && g_sCrops[i].m_bActive == true)
+        {
+            Beep(1440, 30);
+            g_sCrops[i].m_bActive = false;
+        }
     }
 
+    if (g_sCrops[0].m_bActive == false && g_sCrops[1].m_bActive == false && g_sCrops[2].m_bActive == false && g_sCrops[3].m_bActive == false && g_sCrops[4].m_bActive == false
+        && g_sCrops[5].m_bActive == false && g_sCrops[6].m_bActive == false && g_sCrops[7].m_bActive == false && g_sCrops[8].m_bActive == false && g_sCrops[9].m_bActive == false
+        && g_sCrops[10].m_bActive == false && g_sCrops[11].m_bActive == false && g_sCrops[12].m_bActive == false && g_sCrops[13].m_bActive == false && g_sCrops[14].m_bActive == false
+        && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
+        )
+        g_eGameState = S_WINSCREEN;
+      
 }
-*/
+
+void UpdateSpiders()
+{
+    for (int i = 0; i < 15; i++)
+    {
+        if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == true)
+        {
+            g_eGameState = S_LOSESCREEN;
+        }
+    }
+}
+
+void updateLosingscreen()
+{
+    LoseInput();
+    renderLosingscreen();
+}
+
+void updateWinscreen()
+{
+    WinInput();
+    renderWinscreen();
+}
 
 void moveCharacter()
-{
+{    
     // Updating the location of the character based on the key release
     // providing a beep sound whenver we shift the character
-    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0)
+    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0 && g_dDeltaTime > 0)
     {
         //Beep(1440, 30);
         g_sChar.m_cLocation.Y--;
@@ -286,31 +351,41 @@ void moveCharacter()
     if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X--;
+        g_sChar.m_cLocation.X--;        
     }
     if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.Y++;
+        g_sChar.m_cLocation.Y++;        
     }
     if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
-        g_sChar.m_cLocation.X++;
+        g_sChar.m_cLocation.X++;        
     }
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
-        g_sChar.m_bActive = !g_sChar.m_bActive;
+        g_sChar.m_bActive = !g_sChar.m_bActive;        
     }
-
-
+   
 }
+
+//void PlayerLimiter()
+//{
+//    playerUpdateRate += g_dDeltaTime;
+//    if (playerUpdateRate > 2)
+//    {
+//        moveCharacter();
+//        playerUpdateRate = 0.0;
+//    }
+//}
+
 void processUserInput()
 {
     // quits the game if player hits the escape key
     if (g_skKeyEvent[K_ESCAPE].keyReleased)
-        g_eGameState = S_MENU;
-
+        g_eGameState = S_MENU;   
+    
 }
 
 // for detecting if user clicks on back button in How To PLay screen
@@ -342,9 +417,85 @@ void MenuInput()
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
+
+        for (int i = 0; i < 20; i++)
+        {
+            g_sCrops[i].m_cLocation.X = (rand() % 68);
+            g_sCrops[i].m_cLocation.Y = (rand() % 22);
+            g_sCrops[i].m_bActive = true;
+        }
+
+        for (int i = 0; i < 15; i++)
+        {
+            g_sSpiders[i].m_cLocation.X = (rand() % 68);
+            g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+            g_sSpiders[i].m_bActive = true;
+        }
     }
 }
 
+void LoseInput()
+{
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GAME;
+        if (g_eGameState = S_GAME)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++) 
+            {
+                g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+            }
+            
+            for (int i = 0; i < 20; i++)
+            {
+                g_sCrops[i].m_cLocation.X = (rand() % 64);
+                g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                g_sCrops[i].m_bActive = true;
+            }
+
+        }
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+
+
+}
+
+void WinInput()
+{
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_GAME;
+        if (g_eGameState = S_GAME)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                g_sCrops[i].m_cLocation.X = (rand() % 64);
+                g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                g_sCrops[i].m_bActive = true;
+            }
+     
+            g_sChar.m_bActive = true;
+
+        }
+    }
+}
 //--------------------------------------------------------------
 // Purpose  : Render function is to update the console screen
 //            At this point, you should know exactly what to draw onto the screen.
@@ -361,16 +512,85 @@ void render()
     case S_SPLASHSCREEN: renderSplashScreen();
         break;
     case S_GAME: renderGame();
-        break;
+        break; 
     case S_GUIDE: renderguide();
         break;
     case S_MENU: rendermenu();
         break;
+    case S_LOSESCREEN: renderLosingscreen();
+        break;
+    case S_WINSCREEN: renderWinscreen();
+        break;
     }
-    renderFramerate();      // renders debug information, frame rate, elapsed time, etc
+
+    
     renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
 }
+
+void renderTimer()
+{
+    
+
+    COORD c;
+    // displays the time
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(3);
+    ss.str("");
+    ss << g_dElapsedTime << "secs";
+    c.X = 70;
+    c.Y = 0;
+    g_Console.writeToBuffer(c, ss.str(), 46);
+
+    if (g_dElapsedTime > 10.0)
+        g_Console.writeToBuffer(c, ss.str(), 44);
+    
+ 
+}
+
+void spiderMovement()
+{
+    for (int i = 0; i < 15; i++)
+    {
+        EnemyUpdateRate += g_dDeltaTime;
+        int random = rand() % 8 + 1;
+        switch (random)
+        {
+
+        case 1:
+            if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.X++;
+                EnemyUpdateRate = 0;
+            }
+            break;
+        case 2:
+            if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.Y++;
+                EnemyUpdateRate = 0;
+            }
+            break;
+        case 3:
+            if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.X--;
+                EnemyUpdateRate = 0;
+            }
+            break;
+        case 4:
+            if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.4)
+            {
+                g_sSpiders[i].m_cLocation.Y--;
+                EnemyUpdateRate = 0;
+            }
+            break;
+
+        }
+
+    }
+}
+
 
 void clearScreen()
 {
@@ -400,12 +620,11 @@ void renderSplashScreen()  // renders the splash screen
 
 void renderGame()
 {
-   
-    renderMap();        // renders the map to the buffer first
- //   renderCrops();      // renders the mobs into the buffer
-    renderSpiders();    // renders spiders into the buffer next
+    renderMap();        // renders the map to the buffer first  
+    renderTimer();      // renders debug information, frame rate, elapsed time, etc
+    renderCrops();
     renderCharacter();  // renders the character into the buffer
-
+    renderSpiders();
 }
 
 //Renders the menu screen
@@ -420,7 +639,7 @@ void rendermenu()
     c.X = 33;
     c.Y = 5;
     colour(colors[4]);
-    g_Console.writeToBuffer(c, "Locust Rush", colors[4]);
+    g_Console.writeToBuffer(c, "LOCUST RUSH", colors[4]);
 
     c.X = 36;
     c.Y = 9;
@@ -463,11 +682,98 @@ void rendermenu()
     }
 }
 
+void renderLosingscreen()
+{
+    const WORD colors[] = {
+    9,26,20,22,31,
+    };
+
+    COORD c;
+
+    c.X = 33;
+    c.Y = 5;
+    colour(colors[4]);
+    g_Console.writeToBuffer(c, "YOU DIED", colors[4]);
+
+    c.X = 32;
+    c.Y = 11;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "Play again", colors[4]);
+
+    c.X = 31;
+    c.Y = 13;
+    colour(colors[0]);
+    g_Console.writeToBuffer(c, "Back to menu", colors[4]);
+
+    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44)
+    {
+        c.X = 32;
+        c.Y = 11;
+        colour(colors[3]);
+        g_Console.writeToBuffer(c, "Play  again", colors[3]);
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 29 && g_mouseEvent.mousePosition.X < 44)
+    {
+        c.X = 31;
+        c.Y = 13;
+        colour(colors[3]);
+        g_Console.writeToBuffer(c, "Back  to  menu", colors[3]);
+    }
+
+}
+
+void renderWinscreen()
+{
+    {
+        const WORD colors[] = {
+        9,26,20,22,31,
+        };
+
+        COORD c;
+
+        c.X = 33;
+        c.Y = 5;
+        colour(colors[4]);
+        g_Console.writeToBuffer(c, "YOU WIN", colors[4]);
+
+        c.X = 32;
+        c.Y = 11;
+        colour(colors[0]);
+        g_Console.writeToBuffer(c, "Play again", colors[4]);
+
+        c.X = 29;
+        c.Y = 13;
+        colour(colors[0]);
+        g_Console.writeToBuffer(c, "Go to next level", colors[4]);
+
+        if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 44)
+        {
+            c.X = 32;
+            c.Y = 11;
+            colour(colors[3]);
+            g_Console.writeToBuffer(c, "Play  again", colors[3]);
+        }
+
+        if (g_mouseEvent.mousePosition.Y == 13 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 44)
+        {
+            c.X = 29;
+            c.Y = 13;
+            colour(colors[3]);
+            g_Console.writeToBuffer(c, "Go to next level", colors[3]);
+        }
+
+    }
+}
+
+
 void updatemenu()
 {
     MenuInput();
     rendermenu();
 }
+
+
 
 void updateguide()
 {
@@ -476,7 +782,7 @@ void updateguide()
 }
 
 //renders How To Play screen
-void renderguide()
+void renderguide() 
 {
     COORD c = g_Console.getConsoleSize();
     c.Y /= 7;
@@ -506,40 +812,42 @@ void renderguide()
     c.Y += 3;
     c.X = g_Console.getConsoleSize().X / 2 - 40;
     g_Console.writeToBuffer(c, "To win, the swarm must consume all the crops on the field in the shortest amount of time, without dying to either predators or pest control.", 31);
-
+ 
     c.X = 63;
     c.Y = 23;
     g_Console.writeToBuffer(c, "Back", 15);
 
-    if (g_mouseEvent.mousePosition.Y == 23 && g_mouseEvent.mousePosition.X >= 63 && g_mouseEvent.mousePosition.X < 67)
+    if(g_mouseEvent.mousePosition.Y == 23 && g_mouseEvent.mousePosition.X >= 63 && g_mouseEvent.mousePosition.X < 67)
     {
         c.X = 63;
         c.Y = 23;
         g_Console.writeToBuffer(c, "Back", 12);
     }
-
+     
 }
 
-/*
 void renderCrops()
 {
     // Draw the location of the spiders
-    for (int i = 0; i < 20; i++) 
+
+    for (int i = 0; i < 20; i++)
     {
-        g_Console.writeToBuffer(g_sCrops[i].m_cLocation, (char)1, 12);
+        g_Console.writeToBuffer(g_sCrops[i].m_cLocation, (char)10, 110);
+        if (g_sCrops[i].m_bActive == false)
+        {
+            g_Console.writeToBuffer(g_sCrops[i].m_cLocation, (char)10, 46);
+        }
     }
 }
-*/
+
 
 void renderSpiders()
 {
-    // Draw the location of the spiders
-    WORD charColor = 10;
-    if (g_sSpiders.m_bActive)
+
+    for (int i = 0; i < 15; i++)
     {
-        charColor = 10;
+        g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)31, 7);
     }
-    g_Console.writeToBuffer(g_sSpiders.m_cLocation, (char)7, charColor);
 }
 
 void renderCharacter()
@@ -556,89 +864,89 @@ void renderCharacter()
 
 void renderMap()
 {
-    // if you code right it appears at bottom, code left appears top
-    // Set up sample colours, and output shadings
-    const WORD colors[80][25] = {
-32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32, 32,132,132,132, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32, 132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32, 132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	132,132,132,132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	132,132,132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	132,132,132,32, 32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32,	32,
-32,	132,132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32, 32,
-32,	132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32, 32,
-32,	32,132, 32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32, 32,
-32,	32, 32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,32,	32,
-32,	32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32, 32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	132,132,132,32, 32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	132,32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	132,32,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,132,132,132,132,32, 32,	32,	32, 32,
-32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32, 32,
-32,	32,	32,	132,132,32, 32,	32,	32,	32,	32,	32,	32,	32,	32,	132,132,132,132,32,32,	32,	32,	32, 32,
-32,	32,	32,	132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	132,132,132,132,132,132,32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
-32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32
+
+    const WORD colors[80][25] = 
+    {
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,
+        32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32,	32
 
 
     };
@@ -651,322 +959,15 @@ void renderMap()
             c.Y = y;
             g_Console.writeToBuffer(c, "  ", colors[x][y]);
         }
-
     }
 
-    //COORD c;
-    //for (int i = 0; i < 50; ++i) //green bg
-    //{
-    //    for (int r = 0; r < i; ++r)
-    //    {
-    //        c.X = r;
-    //        c.Y = i;
-    //        colour(colors[0]);
-    //        g_Console.writeToBuffer(c, "  ", colors[0]);
-    //    }
-    //}
-    //for (int i = 0; i < 80; ++i) //green bg
-    //{
-    //    for (int r = 0; r < i; ++r)
-    //    {
-    //        c.X = i;
-    //        c.Y = r;
-    //        colour(colors[0]);
-    //        g_Console.writeToBuffer(c, "  ", colors[0]);
-    //    }
-    //}
-    //for (int i = 20; i < 50; ++i) //yellow bottom left 
-    //{
-    //    for (int r = 0; r < i; ++r)
-    //    {
-    //        c.X = r;
-    //        c.Y = i;
-    //        colour(colors[1]);
-    //        g_Console.writeToBuffer(c, "  ", colors[1]);
-    //    }
-
-    //}
-    //for (int i = 40; i < 50; ++i) //yellowish top right
-    //{
-    //    for (int r = 0; r < 5; ++r)
-    //    {
-    //        c.X = i;
-    //        c.Y = r;
-    //        colour(colors[1]);
-    //        g_Console.writeToBuffer(c, "  ", colors[1]);
-    //    }
-    //}
-    //for (int i = 0; i < 10; ++i) //yellow top left
-    //{
-    //    for (int r = 0; r < i; ++r)
-    //    {
-    //        c.X = r;
-    //        c.Y = i;
-    //        colour(colors[1]);
-    //        g_Console.writeToBuffer(c, "  ", colors[1]);
-    //    }
-    //}
-    //for (int i = 44; i < 50; ++i) //top right line
-    //{
-    //    c.X = i;
-    //    c.Y = 5;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //yellow spot at top right
-    //{
-    //    c.X = 37;
-    //    c.Y = 0;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //yellow spot at top right
-    //{
-    //    c.X = 38;
-    //    c.Y = 0;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //yellow spot at top right
-    //{
-    //    c.X = 38;
-    //    c.Y = 1;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //yellow spot at top right
-    //{
-    //    c.X = 38;
-    //    c.Y = 2;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 52; ++i) //yellow spot at top right
-    //{
-    //    c.X = 51;
-    //    c.Y = 0;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 60; ++i) //yellow spot at top right
-    //{
-    //    c.X = 57;
-    //    c.Y = 1;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //top right lines
-    //{
-    //    c.X = 47;
-    //    c.Y = 6;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //scattered yellow spot
-    //{
-    //    c.X = 30;
-    //    c.Y = 10;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //scattered yellow spot
-    //{
-    //    c.X = 36;
-    //    c.Y = 14;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //scattered yellow spot
-    //{
-    //    c.X = 11;
-    //    c.Y = 14;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //scattered yellow spot
-    //{
-    //    c.X = 19;
-    //    c.Y = 5;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 50; ++i) //scattered yellow spot
-    //{
-    //    c.X = 26;
-    //    c.Y = 2;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-
-    //for (int i = 0; i < 50; ++i) //scattered yellow spot
-    //{
-    //    c.X = 43;
-    //    c.Y = 7;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-
-    //for (int i = 0; i < 65; ++i) //scattered yellow spot
-    //{
-    //    c.X = 50;
-    //    c.Y = 9;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 65; ++i) //scattered yellow spot
-    //{
-    //    c.X = 63;
-    //    c.Y = 16;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 65; ++i) //scattered yellow spot
-    //{
-    //    c.X = 30;
-    //    c.Y = 21;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 60; i < 62; ++i) //bottom right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 23;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 44; i < 53; ++i) //bottom right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 22;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 42; i < 54; ++i) //bottom right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 21;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 42; i < 54; ++i) //bottom right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 20;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 43; i < 55; ++i) //bottom right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 19;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 45; i < 51; ++i) //bottom right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 18;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 48; i < 50; ++i) //bottom right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 17;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 8; ++i) //top right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 10;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 6; ++i) //top right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 11;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 2; ++i) //top right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 12;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-
-    //for (int i = 0; i < 13; ++i) //bottom left lines
-    //{
-    //    c.X = i;
-    //    c.Y = 19;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 0; i < 8; ++i) //bottom left lines
-    //{
-    //    c.X = i;
-    //    c.Y = 18;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 53; i < 60; ++i) //mid right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 13;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 56; i < 59; ++i) //mid right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 12;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 56; i < 60; ++i) //mid right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 15;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-    //for (int i = 52; i < 62; ++i) //mid right lines
-    //{
-    //    c.X = i;
-    //    c.Y = 14;
-    //    colour(colors[1]);
-    //    g_Console.writeToBuffer(c, "  ", colors[1]);
-    //}
-
-}
-
-void renderFramerate()
-{
-    COORD c;
-    // displays the framerate
-    std::ostringstream ss;
-    ss << std::fixed << std::setprecision(3);
-    ss << 1.0 / g_dDeltaTime << "fps";
-    c.X = g_Console.getConsoleSize().X - 9;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str());
-
-    // displays the elapsed time
-    ss.str("");
-    ss << g_dElapsedTime << "secs";
-    c.X = 0;
-    c.Y = 0;
-    g_Console.writeToBuffer(c, ss.str(), 0x59);
 }
 
 // this is an example of how you would use the input events
 void renderInputEvents()
 {
     // keyboard events
-    COORD startPos = { 50, 2 };
+    COORD startPos = {50, 2};
     std::ostringstream ss;
     std::string key;
     for (int i = 0; i < K_COUNT; ++i)
@@ -987,11 +988,10 @@ void renderInputEvents()
         default: continue;
         }
         
-
         COORD c = { startPos.X, startPos.Y + i };
         g_Console.writeToBuffer(c, ss.str(), 23);
     }
-
+    
     // mouse events    
     ss.str("");
     ss << "Mouse position (" << g_mouseEvent.mousePosition.X << ", " << g_mouseEvent.mousePosition.Y << ")";
@@ -1019,7 +1019,7 @@ void renderInputEvents()
     case DOUBLE_CLICK:
         ss.str("Double Clicked");
         g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 4, ss.str(), 0x59);
-        break;
+        break;        
     case MOUSE_WHEELED:
         if (g_mouseEvent.buttonState & 0xFF000000)
             ss.str("Mouse wheeled down");
@@ -1027,8 +1027,11 @@ void renderInputEvents()
             ss.str("Mouse wheeled up");
         g_Console.writeToBuffer(g_mouseEvent.mousePosition.X, g_mouseEvent.mousePosition.Y + 5, ss.str(), 0x59);
         break;
-    default:
+    default:        
         break;
     }
-
+    
 }
+
+
+
