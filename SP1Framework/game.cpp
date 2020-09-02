@@ -19,9 +19,12 @@ SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 // Game specific variables here
-SGameChar   g_sChar;
-SGameCrop   g_sCrops[20];
-SGameSpider g_sSpiders[15];
+SObject   g_sChar;
+SObject   g_sCrops[20];
+SObject g_sSpiders[15];
+SObject g_sPowerups[3];
+bool powered;
+
 //DIRECTION   direction;
 EGAMESTATES g_eGameState = S_MENU; // initial state
 
@@ -54,6 +57,8 @@ void init(void)
     // remember to set your keyboard handler, so that your functions can be notified of input events
     g_Console.setKeyboardHandler(keyboardHandler);
     g_Console.setMouseHandler(mouseHandler);
+
+    powered = false;
 }
 
 //--------------------------------------------------------------
@@ -149,6 +154,8 @@ void mouseHandler(const MOUSE_EVENT_RECORD & mouseEvent)
     case S_WINSCREEN: gameplayMouseHandler(mouseEvent);
         break;
     case S_PESTCONTROLSCREEN: gameplayMouseHandler(mouseEvent);
+        break;
+    case S_DECIMATIONSCREEN: gameplayMouseHandler(mouseEvent);
         break;
     }
 }
@@ -264,7 +271,10 @@ void update(double dt)
     case S_WINSCREEN: updateWinscreen();
         break;  
     case S_PESTCONTROLSCREEN: updatePestcontrol();
-        break; 
+        break;
+    case S_DECIMATIONSCREEN: updateDecimationscreen(); // later put above
+        break;
+    
     }
 
 }
@@ -287,10 +297,12 @@ void updateGame()       // gameplay logic
     UpdateSpiders();
     spiderMovement();                    // sound can be played here too.
     UpdatePestcontroltimer(); 
+    UpdatePowerups();
 }
 
 void UpdateCrops()
 {
+    bool win;
     for (int i = 0; i < 20; i++)
     {
         if (g_sChar.m_cLocation.X == g_sCrops[i].m_cLocation.X &&
@@ -307,7 +319,42 @@ void UpdateCrops()
         && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
         )
         g_eGameState = S_WINSCREEN;
+}
+//    for (int i = 0; i < 20; i++)
+//    {
+//        if (g_sCrops[i].m_bActive == true)
+//            win = false;
+//        else if (g_sCrops[i].m_bActive == false)
+//            win = true;
+//    }
+//    if (win == true)
+//        g_eGameState = S_WINSCREEN;
+//}
 
+void UpdatePowerups()
+{
+    for (int i = 0; i < 3; i++)
+        if (g_sChar.m_cLocation.X == g_sPowerups[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sPowerups[i].m_cLocation.Y && g_sPowerups[i].m_bActive == true)
+        {
+            Beep(1440, 30);
+            g_sPowerups[i].m_bActive = false;
+            powered = true;
+
+            if (powered = true)
+            {
+
+            }
+
+            
+            /*g_sChar.m_bActive;*/
+        }
+
+    if (g_sPowerups[0].m_bActive == false && g_sPowerups[1].m_bActive == false && g_sPowerups[2].m_bActive == false)
+    {
+        // g_eGameState = S_MENU; // DECIMATION SCREEN
+        // g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, 13);
+    }
 }
 
 void UpdatePestcontroltimer()
@@ -328,8 +375,6 @@ void UpdateSpiders()
             g_eGameState = S_LOSESCREEN;
         }
     }
-
-
 }
 
 void updateLosingscreen()
@@ -342,7 +387,11 @@ void updateWinscreen()
 {
     WinInput();
     renderWinscreen();
-} 
+}
+void updateDecimationscreen()
+{
+}
+
 
 void updatePestcontrol() 
 {
@@ -443,6 +492,13 @@ void MenuInput()
             g_sSpiders[i].m_cLocation.Y = (rand() % 22);
             g_sSpiders[i].m_bActive = true;
         }
+
+        for (int i = 0; i < 3; i++)
+        {
+            g_sPowerups[i].m_cLocation.X = (rand() % 68);
+            g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+            g_sPowerups[i].m_bActive = true;
+        }
     }
 }
 
@@ -467,6 +523,12 @@ void LoseInput()
                 g_sCrops[i].m_cLocation.X = (rand() % 64);
                 g_sCrops[i].m_cLocation.Y = (rand() % 22);
                 g_sCrops[i].m_bActive = true;
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                g_sPowerups[i].m_bActive = true;
             }
         }
     }
@@ -502,6 +564,13 @@ void WinInput()
                 g_sCrops[i].m_bActive = true;
             }
 
+            for (int i = 0; i < 3; i++)
+            {
+                g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                g_sPowerups[i].m_bActive = true;
+            }
+
             g_sChar.m_bActive = true;
 
         }
@@ -535,6 +604,13 @@ void PestControlinput()
             g_sCrops[i].m_cLocation.X = (rand() % 64);
             g_sCrops[i].m_cLocation.Y = (rand() % 22);
             g_sCrops[i].m_bActive = true;  
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            g_sPowerups[i].m_cLocation.X = (rand() % 68);
+            g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+            g_sPowerups[i].m_bActive = true;
         }
 
         
@@ -676,6 +752,7 @@ void renderGame()
     renderMap();        // renders the map to the buffer first  
     renderTimer();      // renders debug information, frame rate, elapsed time, etc
     renderCrops();
+    renderPowerups();
     renderCharacter();  // renders the character into the buffer
     renderSpiders();
 }
@@ -859,6 +936,10 @@ void renderPestscreen()
     }
 }
 
+void renderDecimationscreen()
+{
+}
+
 
 void updatemenu()
 {
@@ -943,15 +1024,23 @@ void renderSpiders()
     }
 }
 
+void renderPowerups()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        g_Console.writeToBuffer(g_sPowerups[i].m_cLocation, (char)30, 9);
+    }
+}
+
 void renderCharacter()
 {
     // Draw the location of the character
-    WORD charColor = 0x0C;
+    /*WORD charColor = 0x0C;
     if (g_sChar.m_bActive)
     {
         charColor = 224;
-    }
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, charColor);
+    }*/
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, 15);
 }
 
 
