@@ -273,8 +273,8 @@ void update(double dt)
     case S_PESTCONTROLSCREEN: updatePestcontrol();
         break;
     case S_DECIMATIONSCREEN: updateDecimationscreen(); // later put above
-        break;
-    
+break;
+
     }
 
 }
@@ -296,7 +296,7 @@ void updateGame()       // gameplay logic
     UpdateCrops();
     UpdateSpiders();
     spiderMovement();                    // sound can be played here too.
-    UpdatePestcontroltimer(); 
+    UpdatePestcontroltimer();
     UpdatePowerups();
 }
 
@@ -319,17 +319,20 @@ void UpdateCrops()
         && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
         )
         g_eGameState = S_WINSCREEN;
-}  // characters location same with spider then spider = false AND spider must stop moving
-//    for (int i = 0; i < 20; i++)
-//    {
-//        if (g_sCrops[i].m_bActive == true)
-//            win = false;
-//        else if (g_sCrops[i].m_bActive == false)
-//            win = true;
-//    }
-//    if (win == true)
-//        g_eGameState = S_WINSCREEN;
-//}
+
+    // characters location same with spider then spider = false AND spider must stop moving
+      //for (int i = 0; i < 20; i++)
+      //{
+      //    if (g_sCrops[i].m_bActive == true) // later try put x = x and y = y
+      //        win = false;
+      //    else 
+      //        win = true;
+      //}
+      //if (win == true)
+      //{
+      //    g_eGameState = S_WINSCREEN;
+      //}
+}
 
 void UpdatePowerups()
 {
@@ -344,7 +347,7 @@ void UpdatePowerups()
             g_sChar.m_bActive = powered;
         }
     } // if problem cant be solved use powerups 1
-    
+
     //if (g_sPowerups[0].m_bActive == false && g_sPowerups[1].m_bActive == false && g_sPowerups[2].m_bActive == false)
     //{
     //    // g_eGameState = S_DECIMATIONSCREEN; // DECIMATION SCREEN
@@ -355,36 +358,38 @@ void UpdatePowerups()
 void UpdatePestcontroltimer()
 {
     if (g_dElapsedTime > 50.0)
-    { 
+    {
         g_eGameState = S_PESTCONTROLSCREEN;
     }
 }
 
 void UpdateSpiders()
 {
-    for (int i = 0; i < 15; i++) 
+    for (int i = 0; i < 15; i++)
     {
         if (g_sChar.m_bActive = powered && g_sPowerups[0].m_bActive == false && g_sPowerups[1].m_bActive == false && g_sPowerups[2].m_bActive == false)
         {
-            g_sSpiders[i].m_bActive = false;      
-        } // solve issue of multiple afterwards
+            g_sSpiders[i].m_bActive = false;
+        }
 
         if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
             g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == false)
         {
             g_eGameState = S_WINSCREEN;
         }
+
+        /*if (int i = 0 && g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == false)
+        {
+            g_eGameState = S_WINSCREEN;
+        }*/
         
+
         if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
             g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == true)
         {
             g_eGameState = S_LOSESCREEN;
         }
-
-        /*(g_sSpiders[0].m_bActive == false && g_sSpiders[1].m_bActive == false && g_sSpiders[2].m_bActive == false && g_sSpiders[3].m_bActive == false && g_sSpiders[4].m_bActive == false
-            && g_sSpiders[5].m_bActive == false && g_sSpiders[6].m_bActive == false && g_sSpiders[7].m_bActive == false && g_sSpiders[8].m_bActive == false && g_sSpiders[9].m_bActive == false
-            && g_sSpiders[10].m_bActive == false && g_sSpiders[11].m_bActive == false && g_sSpiders[12].m_bActive == false && g_sSpiders[13].m_bActive == false && g_sSpiders[14].m_bActive == false)*/
-
     }
 }
 
@@ -763,8 +768,8 @@ void renderGame()
     renderTimer();      // renders debug information, frame rate, elapsed time, etc
     renderCrops();
     renderPowerups();
-    renderCharacter();  // renders the character into the buffer
     renderSpiders();
+    renderCharacter();  // renders the character into the buffer
 }
 
 //Renders the menu screen
