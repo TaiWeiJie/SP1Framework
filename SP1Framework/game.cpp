@@ -372,17 +372,20 @@ void UpdateSpiders()
             g_sSpiders[i].m_bActive = false;
         }
 
+        //if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
+        //    g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == false)
+        //{
+        //    // if spider is false, counter goes down // becomes 0 below
+        //    /*g_sSpiders[14].m_bActive == g_sSpiders[13].m_bActive == g_sSpiders[12].m_bActive == g_sSpiders[11].m_bActive == g_sSpiders[10].m_bActive == g_sSpiders[9].m_bActive == g_sSpiders[8].m_bActive == g_sSpiders[7].m_bActive
+        //        == g_sSpiders[6].m_bActive == g_sSpiders[5].m_bActive == g_sSpiders[4].m_bActive == g_sSpiders[3].m_bActive == g_sSpiders[2].m_bActive == g_sSpiders[1].m_bActive == g_sSpiders[0].m_bActive;*/
+
+        //}
+
         if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
-            g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == false)
+             g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == false)
         {
             g_eGameState = S_WINSCREEN;
         }
-
-        /*if (int i = 0 && g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
-            g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == false)
-        {
-            g_eGameState = S_WINSCREEN;
-        }*/
         
 
         if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
