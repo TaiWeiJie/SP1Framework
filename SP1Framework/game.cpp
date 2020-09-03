@@ -334,27 +334,22 @@ void UpdateCrops()
 void UpdatePowerups()
 {
     for (int i = 0; i < 3; i++)
+    {
         if (g_sChar.m_cLocation.X == g_sPowerups[i].m_cLocation.X &&
             g_sChar.m_cLocation.Y == g_sPowerups[i].m_cLocation.Y && g_sPowerups[i].m_bActive == true)
         {
             Beep(1440, 30);
             g_sPowerups[i].m_bActive = false;
             powered = true;
-
-            if (powered = true)
-            {
-
-            }
-
-            
-            /*g_sChar.m_bActive;*/
+            g_sChar.m_bActive = powered;
         }
-
-    if (g_sPowerups[0].m_bActive == false && g_sPowerups[1].m_bActive == false && g_sPowerups[2].m_bActive == false)
-    {
-        // g_eGameState = S_MENU; // DECIMATION SCREEN
-        // g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, 13);
-    }
+    } // if problem cant be solved use powerups 1
+    
+    //if (g_sPowerups[0].m_bActive == false && g_sPowerups[1].m_bActive == false && g_sPowerups[2].m_bActive == false)
+    //{
+    //    // g_eGameState = S_DECIMATIONSCREEN; // DECIMATION SCREEN
+    //    // g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, 13);
+    //}
 }
 
 void UpdatePestcontroltimer()
@@ -369,6 +364,16 @@ void UpdateSpiders()
 {
     for (int i = 0; i < 15; i++) 
     {
+        if (g_sChar.m_bActive = powered)
+        {
+            g_sSpiders[i].m_bActive = false;
+        } // solve issue of multiple afterward
+
+        
+        
+        // else if g_sChar != powered
+       // if (g_sSpiders[i].m_bActive = false
+
         if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
             g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == true)
         {
@@ -516,6 +521,7 @@ void LoseInput()
             {
                 g_sSpiders[i].m_cLocation.X = (rand() % 68);
                 g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                g_sSpiders[i].m_bActive = true;
             }
 
             for (int i = 0; i < 20; i++)
@@ -556,6 +562,7 @@ void WinInput()
             {
                 g_sSpiders[i].m_cLocation.X = (rand() % 68);
                 g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                g_sSpiders[i].m_bActive = true;
             }
             for (int i = 0; i < 20; i++)
             {
@@ -597,6 +604,7 @@ void PestControlinput()
         {
             g_sSpiders[i].m_cLocation.X = (rand() % 68);
             g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+            g_sSpiders[i].m_bActive = true;
         }
 
         for (int i = 0; i < 20; i++)
@@ -1020,7 +1028,15 @@ void renderSpiders()
 
     for (int i = 0; i < 15; i++)
     {
-        g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)31, 7);
+        if (g_sSpiders[i].m_bActive == true)
+        {
+            g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)31, 7);
+        }
+        
+        if (g_sSpiders[i].m_bActive == false)
+        {
+            g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)25, 1);
+        }
     }
 }
 
@@ -1029,6 +1045,10 @@ void renderPowerups()
     for (int i = 0; i < 3; i++)
     {
         g_Console.writeToBuffer(g_sPowerups[i].m_cLocation, (char)30, 9);
+        if (g_sPowerups[i].m_bActive == false)
+        {
+            g_Console.writeToBuffer(g_sPowerups[i].m_cLocation, (char)30, 2);
+        }
     }
 }
 
@@ -1040,7 +1060,7 @@ void renderCharacter()
     {
         charColor = 224;
     }*/
-    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, 15);
+    g_Console.writeToBuffer(g_sChar.m_cLocation, (char)5, 10);
 }
 
 
