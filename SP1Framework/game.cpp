@@ -319,7 +319,7 @@ void UpdateCrops()
         && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
         )
         g_eGameState = S_WINSCREEN;
-}
+}  // characters location same with spider then spider = false AND spider must stop moving
 //    for (int i = 0; i < 20; i++)
 //    {
 //        if (g_sCrops[i].m_bActive == true)
@@ -364,21 +364,27 @@ void UpdateSpiders()
 {
     for (int i = 0; i < 15; i++) 
     {
-        if (g_sChar.m_bActive = powered)
+        if (g_sChar.m_bActive = powered && g_sPowerups[0].m_bActive == false && g_sPowerups[1].m_bActive == false && g_sPowerups[2].m_bActive == false)
         {
-            g_sSpiders[i].m_bActive = false;
-        } // solve issue of multiple afterward
+            g_sSpiders[i].m_bActive = false;      
+        } // solve issue of multiple afterwards
 
+        if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == false)
+        {
+            g_eGameState = S_WINSCREEN;
+        }
         
-        
-        // else if g_sChar != powered
-       // if (g_sSpiders[i].m_bActive = false
-
         if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
             g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == true)
         {
             g_eGameState = S_LOSESCREEN;
         }
+
+        /*(g_sSpiders[0].m_bActive == false && g_sSpiders[1].m_bActive == false && g_sSpiders[2].m_bActive == false && g_sSpiders[3].m_bActive == false && g_sSpiders[4].m_bActive == false
+            && g_sSpiders[5].m_bActive == false && g_sSpiders[6].m_bActive == false && g_sSpiders[7].m_bActive == false && g_sSpiders[8].m_bActive == false && g_sSpiders[9].m_bActive == false
+            && g_sSpiders[10].m_bActive == false && g_sSpiders[11].m_bActive == false && g_sSpiders[12].m_bActive == false && g_sSpiders[13].m_bActive == false && g_sSpiders[14].m_bActive == false)*/
+
     }
 }
 
@@ -579,7 +585,6 @@ void WinInput()
             }
 
             g_sChar.m_bActive = true;
-
         }
     }
 
@@ -693,7 +698,6 @@ void spiderMovement()
         int random = rand() % 8 + 1;
         switch (random)
         {
-
         case 1:
             if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.3)
             {
@@ -722,9 +726,7 @@ void spiderMovement()
                 EnemyUpdateRate = 0;
             }
             break;
-
         }
-
     }
 }
 
