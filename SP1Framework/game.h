@@ -40,10 +40,13 @@ enum EKEYS
 enum EGAMESTATES
 {
     S_SPLASHSCREEN,
+    S_LOSESCREEN,
+    S_WINSCREEN,
+    S_PESTCONTROLSCREEN,
     S_MENU,
     S_GUIDE,
     S_GAME,
-    S_COUNT
+    S_COUNT,
 };
 
 // struct for the game character
@@ -57,14 +60,22 @@ struct SGameCrop
 {
     COORD m_cLocation;
     bool  m_bActive;
+
 };
 
-
-
-struct SGameSpiders
+struct SGameSpider
 {
     COORD m_cLocation;
     bool  m_bActive;
+
+};
+
+struct DIRECTION
+{
+    bool up;
+    bool down;
+    bool left;
+    bool right;
 };
 
 void init(void);      // initialize your variables, allocate memory, etc
@@ -74,7 +85,72 @@ void render(void);      // renders the current state of the game to the console
 void shutdown(void);      // do clean up, free memory
 void splashScreenWait();    // waits for time to pass in splash screen
 void updateGame();          // gameplay logic
-// void MoveInput();
+void spiderMovement();
+void MoveInput();
+void moveCharacter();       // moves the character, collision detection, physics, etc
+void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
+void clearScreen();         // clears the current screen and draw from scratch 
+void renderSplashScreen();  // renders the splash screen
+void renderGame();          // renders the game stuff
+void renderMap();           // renders the map to the buffer first
+void renderCharacter();     // renders the character into the buffer
+void renderTimer();
+void PlayerLimiter();
+void renderCrops();
+void renderSpiders();
+void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
+void renderInputEvents();   // renders the status of input events
+void updateguide();         // Updates guide
+void updatemenu();          // Updates Menu
+void updateLosingscreen();
+void updateWinscreen();
+void updatePrintscreen();
+void UpdateSpiders();
+void UpdateCrops();
+void UpdatePestcontroltimer();
+void renderguide();         // renders How To Play Screen
+void GuideInput();          // Check for inputs in How To Play screen
+void WinInput();
+void LoseInput();
+void PestControlinput();
+void updatePestcontrol();
+void renderLosingscreen();
+void renderWinscreen();
+void renderPestscreen();
+void rendermenu();          // Renders the menu screen
+void MenuInput();           // Check for inputs in main menu
+
+// keyboard and mouse input event managers
+void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
+void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent);      // define this function for the console to call when there are mouse events
+
+void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyboard events for gameplay 
+void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 
+
+
+#endif // _GAME_Hstruct SGameSpiders
+{
+    COORD m_cLocation;
+    bool  m_bActive;
+};
+
+struct DIRECTION {
+    bool up;
+    bool down;
+    bool left;
+    bool right;
+};
+
+const int CLMN = 15;
+
+void init(void);      // initialize your variables, allocate memory, etc
+void getInput(void);      // get input from player
+void update(double dt); // update the game and the state of the game
+void render(void);      // renders the current state of the game to the console
+void shutdown(void);      // do clean up, free memory
+void splashScreenWait();    // waits for time to pass in splash screen
+void updateGame();          // gameplay logic
+void MoveInput();
 void moveCharacter();       // moves the character, collision detection, physics, etc
 void processUserInput();    // checks if you should change states or do something else with the game, e.g. pause, exit
 void clearScreen();         // clears the current screen and draw from scratch 
@@ -83,7 +159,7 @@ void renderGame();          // renders the game stuff
 void renderMap();           // renders the map to the buffer first
 void renderCharacter();     // renders the character into the buffer
 void renderCrops();         // renders crops into the buffer
-// void UpdateCrops();
+void UpdateCrops();
 void renderSpiders();       // renders spiders into the buffer
 void renderFramerate();     // renders debug information, frame rate, elapsed time, etc
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
@@ -94,13 +170,13 @@ void updateLosingscreen();
 void LoseInput();
 void renderLosingscreen();
 void updateWinscreen();
+void renderPestControlscreen();
 void WinInput();
 void renderWinscreen();
 void renderguide();         // renders How To Play Screen
 void GuideInput();          // Check for inputs in How To Play screen
 void rendermenu();          // Renders the menu screen
 void MenuInput();           // Check for inputs in main menu
-
 
 // keyboard and mouse input event managers
 void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent);  // define this function for the console to call when there are keyboard events
@@ -110,4 +186,4 @@ void gameplayKBHandler(const KEY_EVENT_RECORD& keyboardEvent);   // handles keyb
 void gameplayMouseHandler(const MOUSE_EVENT_RECORD& mouseEvent); // handles mouse events for gameplay 
 
 
-#endif // _GAME_H
+
