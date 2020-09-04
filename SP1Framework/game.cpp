@@ -6,7 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <sstream>
-
+#include "CSVloader.h"
 #include "Map.h"
 
 
@@ -22,6 +22,7 @@ SKeyEvent g_skKeyEvent[K_COUNT];
 SMouseEvent g_mouseEvent;
 
 Map g_sMap;
+
 
 // Game specific variables here
 SGameChar   g_sChar;
@@ -49,6 +50,9 @@ void init(void)
 
     // sets the initial state for the game
     g_eGameState = S_MENU;
+    LoadFromCSV("level1.csv", g_sMap);
+
+    
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
@@ -237,6 +241,7 @@ void update(double dt)
         // get the delta time
         g_dElapsedTime += dt;
         g_dDeltaTime = dt;
+
     }
     else if (g_eGameState == S_MENU)
     {
@@ -1035,8 +1040,6 @@ void renderCharacter()
 
 void renderMap()
 {
-
-   
 
     for (int x = 0; x < 80; x++)
     {
