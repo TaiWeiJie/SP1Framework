@@ -1404,6 +1404,7 @@ void renderguide()
         c.Y = 23;
         g_Console.writeToBuffer(c, "Back", 12);
     }
+    //
 
 }
 
