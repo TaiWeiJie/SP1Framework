@@ -49,6 +49,7 @@ enum EGAMESTATES
     S_SPLASHSCREEN,
     S_LOSESCREEN,
     S_WINSCREEN,
+    S_KILLSPIDERSCREEN,
     S_PESTCONTROLSCREEN,
     S_MENU,
     S_GUIDE,
@@ -58,25 +59,26 @@ enum EGAMESTATES
 };
 
 // struct for the game character
-struct SGameChar
+struct SObject
 {
     COORD m_cLocation;
     bool  m_bActive;
+    bool  powered;
 };
 
-struct SGameCrop
-{
-    COORD m_cLocation;
-    bool  m_bActive;
-
-};
-
-struct SGameSpider
-{
-    COORD m_cLocation;
-    bool  m_bActive;
-
-};
+//struct SGameCrop
+//{
+//    COORD m_cLocation;
+//    bool  m_bActive;
+//
+//};
+//
+//struct SGameSpider
+//{
+//    COORD m_cLocation;
+//    bool  m_bActive;
+//
+//};
 
 
 
@@ -108,24 +110,29 @@ void renderTimer();
 //void PlayerLimiter();
 void renderCrops();
 void renderSpiders();
+void renderPowerups();
 void renderToScreen();      // dump the contents of the buffer to the screen, one frame worth of game
 void renderInputEvents();   // renders the status of input events
 void updateguide();         // Updates guide
 void updatemenu();          // Updates Menu
 void updateLosingscreen();
 void updateWinscreen();
+void updateKillspiderscreen();
 // void updatePrintscreen();
 void UpdateSpiders();
 void UpdateCrops();
+void UpdatePowerups();
 void UpdatePestcontroltimer();
 void renderguide();         // renders How To Play Screen
 void GuideInput();          // Check for inputs in How To Play screen
 void WinInput();
 void LoseInput();
+void Killspiderinput();
 void PestControlinput();
 void updatePestcontrol();
 void renderLosingscreen();
 void renderWinscreen();
+void renderKillspiderscreen();
 void renderPestscreen();
 void rendermenu();          // Renders the menu screen
 void MenuInput();           // Check for inputs in main menu
