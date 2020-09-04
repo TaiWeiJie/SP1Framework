@@ -319,9 +319,8 @@ void UpdateCrops()
         && g_sCrops[10].m_bActive == false && g_sCrops[11].m_bActive == false && g_sCrops[12].m_bActive == false && g_sCrops[13].m_bActive == false && g_sCrops[14].m_bActive == false
         && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
         )
-    {
         g_eGameState = S_WINSCREEN;
-    }
+
 }
 
 void UpdatePestcontroltimer()
@@ -497,7 +496,7 @@ void LoseInput()
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
-        if (g_eGameState == S_GAME)
+        if (g_eGameState = S_GAME)
         {
             g_sChar.m_cLocation.X = 40;
             g_sChar.m_cLocation.Y = 12;
@@ -540,7 +539,7 @@ void WinInput()
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
-        if (g_eGameState == S_GAME)
+        if (g_eGameState = S_GAME)
         {
             g_sChar.m_cLocation.X = 40;
             g_sChar.m_cLocation.Y = 12;
@@ -678,87 +677,55 @@ void spiderMovement()
     for (int i = 0; i < 15; i++)
     {
         EnemyUpdateRate += g_dDeltaTime;
-
-
         int random = rand() % 8 + 1;
+        switch (random)
+        {
 
-       
-            switch (random)
+        case 1: // move right
+            if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.3)
             {
-
-            case 1: // move right
-                if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.3)
+                //while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X + 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
                 {
-                    if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X + 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
-                    {
-                        g_sSpiders[i].m_cLocation.X++;
-                        EnemyUpdateRate = 0;
-                        
-                    }
-                    
-                    else
-                    {
-                        break;
-                    }
-                    break;
-                }
-                
-            case 2: // move up
-                if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.3)
-                {
-
-                    if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y - 1] != ROCK)
-                    {
-                        g_sSpiders[i].m_cLocation.Y--;
-                        EnemyUpdateRate = 0;
-                    }
-                    else
-                    {
-                        break;
-                    }
-
-                }
+                    g_sSpiders[i].m_cLocation.X++;
+                    EnemyUpdateRate = 0;
+                } 
                 break;
-            case 3: //move left
-                if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.3)
-                {
-                   if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X - 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
-                   {
-                        g_sSpiders[i].m_cLocation.X--;
-                        EnemyUpdateRate = 0;
-                   }
-
-                   else
-                   {
-                       break;
-                   }
-                }
-                break;
-            case 4: //move down
-                if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.3)
-                {
-                   if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y + 1] != ROCK)
-                   {
-                        g_sSpiders[i].m_cLocation.Y++;
-                        EnemyUpdateRate = 0;
-                   }
-                   else
-                   {
-                       break;
-                   }
-                }
-                break;
-            
             }
-      
+        case 2: // move up
+            if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.3)
+            {
+             //  if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y - 1] != ROCK)
+                {
+                    g_sSpiders[i].m_cLocation.Y++;
+                    EnemyUpdateRate = 0;
+                }
+            }
+            break;
+        case 3: //move left
+            if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.3)
+            {
+              // if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X - 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
+                {
+                    g_sSpiders[i].m_cLocation.X--;
+                    EnemyUpdateRate = 0;
+                }
+            }
+            break;
+        case 4: //move down
+            if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.3)
+            {
+              //  if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y + 1] != ROCK)
+                {
+                    g_sSpiders[i].m_cLocation.Y--;
+                    EnemyUpdateRate = 0;
+                }
+            }
+            break;
+
+        }
+
     }
 }
-
-
-
-
-    
-
 
 
 void clearScreen()
