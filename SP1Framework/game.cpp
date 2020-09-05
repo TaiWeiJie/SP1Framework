@@ -1,3 +1,4 @@
+
 // This is the main file for the game logicand function
 //
 //
@@ -380,13 +381,13 @@ void UpdatePowerups()
     {
         g_sChar.powered = true;
     }
-    if (g_sChar.powered == true)
+    /*if (g_sChar.powered == true)
     {
         if (g_dElapsedTime > 30.0)
         {
             g_eGameState = S_PESTCONTROLSCREEN;
         }
-    }
+    }*/
     //
 }
 
@@ -1549,5 +1550,5 @@ void renderInputEvents()
     //default:
     //    break;
     //}
-
 }
+

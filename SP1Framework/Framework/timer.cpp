@@ -16,13 +16,13 @@ CStopWatch::CStopWatch(void)
     {
         // Error; application can't continue.
     }
-
     m_uTimerRes = min(max(tc.wPeriodMin, TARGET_RESOLUTION), tc.wPeriodMax);
 
     // requests a minimum resolution for periodic timers.
     // goto https://msdn.microsoft.com/en-us/library/windows/desktop/dd757624(v=vs.85).aspx for more info
     timeBeginPeriod(m_uTimerRes);
 }
+//
 
 //--------------------------------------------------------------
 // Purpose  : Destructor
