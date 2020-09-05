@@ -28,6 +28,9 @@ Map g_sMap;
 SGameChar   g_sChar;
 SGameChar   g_sCrops[20];
 SGameChar g_sSpiders[15];
+SGameChar g_sPowerups[3];
+DISPLAY   display;
+WINSTATE  win;
 
 //DIRECTION   direction;
 EGAMESTATES g_eGameState = S_MENU; // initial state
@@ -50,9 +53,17 @@ void init(void)
 
     // sets the initial state for the game
     g_eGameState = S_MENU;
-    LoadFromCSV("level1.csv", g_sMap);
+    //LoadFromCSV("level1.csv", g_sMap);
 
-    
+    /*display.lvl1 = true;
+    display.lvl2 = false;
+    display.lvl3 = false;*/
+
+    win.lvl1 = false;
+    win.lvl2 = false;
+    win.lvl3 = false;
+
+    LoadFromCSV("level1.csv", g_sMap);
 
     g_sChar.m_cLocation.X = g_Console.getConsoleSize().X / 2;
     g_sChar.m_cLocation.Y = g_Console.getConsoleSize().Y / 2;
@@ -123,6 +134,10 @@ void keyboardHandler(const KEY_EVENT_RECORD& keyboardEvent)
         break;
     case S_GAME: gameplayKBHandler(keyboardEvent); // handle gameplay keyboard event 
         break;
+    case S_GAME2: gameplayKBHandler(keyboardEvent); // handle gameplay mouse event
+        break;
+    case S_GAME3: gameplayKBHandler(keyboardEvent); // handle gameplay mouse event
+        break;
     }
 }
 
@@ -150,6 +165,10 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
         break;
     case S_GAME: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
         break;
+    case S_GAME2: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+        break;
+    case S_GAME3: gameplayMouseHandler(mouseEvent); // handle gameplay mouse event
+        break;
     case S_GUIDE: gameplayMouseHandler(mouseEvent);
         break;
     case S_MENU: gameplayMouseHandler(mouseEvent);
@@ -160,6 +179,7 @@ void mouseHandler(const MOUSE_EVENT_RECORD& mouseEvent)
         break;
     case S_PESTCONTROLSCREEN: gameplayMouseHandler(mouseEvent);
         break;
+    case S_KILLSPIDERSCREEN: gameplayMouseHandler(mouseEvent);
     }
 }
 
@@ -238,7 +258,22 @@ void update(double dt)
     //g_dDeltaTime = dt;
     if (g_eGameState == S_GAME)
     {
-        // get the delta time
+        LoadFromCSV("level1.csv", g_sMap);
+        g_dElapsedTime += dt;
+        g_dDeltaTime = dt;
+        
+    }
+    else if (g_eGameState == S_GAME2)
+    {
+        LoadFromCSV("level2.csv", g_sMap);
+        g_dElapsedTime += dt;
+        g_dDeltaTime = dt;
+        
+
+    }
+    else if (g_eGameState == S_GAME3)
+    {
+        LoadFromCSV("level3.csv", g_sMap);
         g_dElapsedTime += dt;
         g_dDeltaTime = dt;
 
@@ -259,6 +294,10 @@ void update(double dt)
     {
         g_dElapsedTime = 0;
     }
+    else if (g_eGameState == S_KILLSPIDERSCREEN)
+    {
+        g_dElapsedTime = 0;
+    }
    
 
     switch (g_eGameState)
@@ -266,6 +305,10 @@ void update(double dt)
     case S_SPLASHSCREEN: splashScreenWait(); // game logic for the splash screen
         break;
     case S_GAME: updateGame(); // gameplay logic when we are in the game
+        break;
+    case S_GAME2: updateGame(); // gameplay logic when we are in the game
+        break;
+    case S_GAME3: updateGame(); // gameplay logic when we are in the game
         break;
     case S_GUIDE: updateguide(); // logic for how to play screen
         break;
@@ -276,6 +319,8 @@ void update(double dt)
     case S_WINSCREEN: updateWinscreen();
         break;
     case S_PESTCONTROLSCREEN: updatePestcontrol();
+        break;
+    case S_KILLSPIDERSCREEN: updateKillspiderscreen();
         break;
     }
 
@@ -299,6 +344,43 @@ void updateGame()       // gameplay logic
     UpdateSpiders();
     spiderMovement();                    // sound can be played here too.
     UpdatePestcontroltimer();
+    UpdatePowerups();
+}
+
+void UpdatePowerups()
+{
+    bool poweredstate = true;
+    for (int i = 0; i < 3; i++)
+    {
+        if (g_sChar.m_cLocation.X == g_sPowerups[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sPowerups[i].m_cLocation.Y && g_sPowerups[i].m_bActive ==
+            true)
+        {
+            Beep(1440, 30);
+            g_sPowerups[i].m_bActive = false;
+            // g_sChar.powered = true;
+            /*powered = true;
+            g_sChar.m_bActive = powered;*/
+        }
+        //if (g_dElapsedTime > 20.0)
+        // {
+        // g_sPowerups[i].m_bActive = false;
+        // g_sChar.powered = false;
+        // /*powered = false;
+        // g_sChar.m_bActive != powered;*/
+        // }
+    }
+    for (int i = 0; i < 3; i++)
+    {
+        if (g_sPowerups[i].m_bActive == true)
+        {
+            poweredstate = false;
+        }
+    }
+    if (poweredstate == true)
+    {
+        g_sChar.powered = true;
+    }
 }
 
 void UpdateCrops()
@@ -314,12 +396,35 @@ void UpdateCrops()
     }
 
     
-    if (g_sCrops[0].m_bActive == false && g_sCrops[1].m_bActive == false && g_sCrops[2].m_bActive == false && g_sCrops[3].m_bActive == false && g_sCrops[4].m_bActive == false
+    if (g_eGameState == S_GAME && g_sCrops[0].m_bActive == false && g_sCrops[1].m_bActive == false && g_sCrops[2].m_bActive == false && g_sCrops[3].m_bActive == false && g_sCrops[4].m_bActive == false
         && g_sCrops[5].m_bActive == false && g_sCrops[6].m_bActive == false && g_sCrops[7].m_bActive == false && g_sCrops[8].m_bActive == false && g_sCrops[9].m_bActive == false
         && g_sCrops[10].m_bActive == false && g_sCrops[11].m_bActive == false && g_sCrops[12].m_bActive == false && g_sCrops[13].m_bActive == false && g_sCrops[14].m_bActive == false
         && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
         )
+    {
         g_eGameState = S_WINSCREEN;
+        win.lvl1 = true;
+    }
+
+    if (g_eGameState == S_GAME2 && g_sCrops[0].m_bActive == false && g_sCrops[1].m_bActive == false && g_sCrops[2].m_bActive == false && g_sCrops[3].m_bActive == false && g_sCrops[4].m_bActive == false
+        && g_sCrops[5].m_bActive == false && g_sCrops[6].m_bActive == false && g_sCrops[7].m_bActive == false && g_sCrops[8].m_bActive == false && g_sCrops[9].m_bActive == false
+        && g_sCrops[10].m_bActive == false && g_sCrops[11].m_bActive == false && g_sCrops[12].m_bActive == false && g_sCrops[13].m_bActive == false && g_sCrops[14].m_bActive == false
+        && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
+        )
+    {
+        g_eGameState = S_WINSCREEN;
+        win.lvl2 = true;
+    }
+
+    if (g_eGameState == S_GAME3 && g_sCrops[0].m_bActive == false && g_sCrops[1].m_bActive == false && g_sCrops[2].m_bActive == false && g_sCrops[3].m_bActive == false && g_sCrops[4].m_bActive == false
+        && g_sCrops[5].m_bActive == false && g_sCrops[6].m_bActive == false && g_sCrops[7].m_bActive == false && g_sCrops[8].m_bActive == false && g_sCrops[9].m_bActive == false
+        && g_sCrops[10].m_bActive == false && g_sCrops[11].m_bActive == false && g_sCrops[12].m_bActive == false && g_sCrops[13].m_bActive == false && g_sCrops[14].m_bActive == false
+        && g_sCrops[15].m_bActive == false && g_sCrops[16].m_bActive == false && g_sCrops[17].m_bActive == false && g_sCrops[18].m_bActive == false && g_sCrops[19].m_bActive == false
+        )
+    {
+        g_eGameState = S_WINSCREEN;
+        win.lvl3 = true;
+    }
 
 }
 
@@ -333,6 +438,16 @@ void UpdatePestcontroltimer()
 
 void UpdateSpiders()
 {
+    bool spidergone = true;
+    for (int i = 0; i < 15; i++)
+    {
+        if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
+            g_sChar.m_cLocation.Y == g_sSpiders[i].m_cLocation.Y && g_sSpiders[i].m_bActive == true
+            && g_sChar.powered == true)
+        {
+            g_sSpiders[i].m_bActive = false;
+        }
+    }
     for (int i = 0; i < 15; i++)
     {
         if (g_sChar.m_cLocation.X == g_sSpiders[i].m_cLocation.X &&
@@ -341,7 +456,29 @@ void UpdateSpiders()
             g_eGameState = S_LOSESCREEN;
         }
     }
-
+    for (int i = 0; i < 15; i++)
+    {
+        if (g_sSpiders[i].m_bActive == true)
+        {
+            spidergone = false;
+        }
+    }
+    if (g_eGameState == S_GAME && spidergone == true)
+    {
+        g_eGameState = S_KILLSPIDERSCREEN;
+        win.lvl1 = true;
+    }
+    //for use later
+    if (g_eGameState == S_GAME2 && spidergone == true)
+    {
+        g_eGameState = S_KILLSPIDERSCREEN;
+        win.lvl2 = true;
+    }
+    if (g_eGameState == S_GAME3 && spidergone == true)
+    {
+        g_eGameState = S_KILLSPIDERSCREEN;
+        win.lvl3 = true;
+    }
 
 }
 
@@ -357,6 +494,12 @@ void updateWinscreen()
     renderWinscreen();
 }
 
+void updateKillspiderscreen()
+{
+    Killspiderinput();
+    renderKillspiderscreen();
+}
+
 void updatePestcontrol()
 {
     PestControlinput();
@@ -365,51 +508,133 @@ void updatePestcontrol()
 
 void moveCharacter()
 {
-    // Updating the location of the character based on the key release
-    // providing a beep sound whenver we shift the character
-    if (g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0 && g_dDeltaTime > 0) 
+    if (g_sChar.powered == false && g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0
+        && g_dDeltaTime > 0)
     {
         //Beep(1440, 30);
-        if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS && */g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y - 1] != ROCK)
+        if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS &&
+       */g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y - 1] != ROCK)
         {
             g_sChar.m_cLocation.Y--;
         }
-        
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.Y--;
+        }*/
     }
-    if (g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X > 0) 
+    if (g_sChar.powered == false && g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X >
+        0)
     {
         //Beep(1440, 30);
-        
-        if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS &&*/ g_sMap.mapArray[g_sChar.m_cLocation.X - 1][g_sChar.m_cLocation.Y] != ROCK)
+        if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS &&*/
+            g_sMap.mapArray[g_sChar.m_cLocation.X - 1][g_sChar.m_cLocation.Y] != ROCK)
         {
             g_sChar.m_cLocation.X--;
         }
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.X--;
+        }*/
     }
-    if (g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y < g_Console.getConsoleSize().Y - 1 )
+    if (g_sChar.powered == false && g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y
+        < g_Console.getConsoleSize().Y - 1)
     {
         //Beep(1440, 30);
-       
-        if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS &&*/ g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y + 1] != ROCK)
-        //{
+        if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS &&*/
+            g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y + 1] != ROCK)
+        {
             g_sChar.m_cLocation.Y++;
-        //}
+        }
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.Y++;
+        }*/
     }
-    if (g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X < g_Console.getConsoleSize().X - 1)
+    if (g_sChar.powered == false && g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X <
+        g_Console.getConsoleSize().X - 1)
     {
         //Beep(1440, 30);
-        
-       if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS &&*/ g_sMap.mapArray[g_sChar.m_cLocation.X + 1][g_sChar.m_cLocation.Y] != ROCK)
+        if (/*g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS &&*/
+            g_sMap.mapArray[g_sChar.m_cLocation.X + 1][g_sChar.m_cLocation.Y] != ROCK)
         {
             g_sChar.m_cLocation.X++;
         }
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.X++;
+        }*/
+    }
+    if (g_sChar.powered == true && g_skKeyEvent[K_UP].keyDown && g_sChar.m_cLocation.Y > 0
+        && g_dDeltaTime > 0)
+    {
+        //Beep(1440, 30);
+        if (g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS ||
+            g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+            g_sChar.m_cLocation.Y--;
+        }
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.Y--;
+        }*/
+    }
+    if (g_sChar.powered == true && g_skKeyEvent[K_LEFT].keyDown && g_sChar.m_cLocation.X >
+        0)
+    {
+        //Beep(1440, 30);
+        if (g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS ||
+            g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+            g_sChar.m_cLocation.X--;
+        }
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.X--;
+        }*/
+    }
+    if (g_sChar.powered == true && g_skKeyEvent[K_DOWN].keyDown && g_sChar.m_cLocation.Y <
+        g_Console.getConsoleSize().Y - 1)
+    {
+        //Beep(1440, 30);
+        if (g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS ||
+            g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+            g_sChar.m_cLocation.Y++;
+        }
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.Y++;
+        }*/
+    }
+    if (g_sChar.powered == true && g_skKeyEvent[K_RIGHT].keyDown && g_sChar.m_cLocation.X <
+        g_Console.getConsoleSize().X - 1)
+    {
+        //Beep(1440, 30);
+        if (g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == GRASS ||
+            g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+            g_sChar.m_cLocation.X++;
+        }
+        /*else if (g_sChar.m_bActive = powered &&
+       g_sMap.mapArray[g_sChar.m_cLocation.X][g_sChar.m_cLocation.Y] == ROCK)
+        {
+        g_sChar.m_cLocation.X++;
+        }*/
     }
     if (g_skKeyEvent[K_SPACE].keyReleased)
     {
         g_sChar.m_bActive = !g_sChar.m_bActive;
     }
-
-    
 }
+
+
 
 //void PlayerLimiter()
 //{
@@ -448,7 +673,7 @@ void MenuInput()
         g_bQuitGame = true;
     }
 
-    // displays guide for game (Not functional yet)
+    
     if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 33 && g_mouseEvent.mousePosition.X < 44 &&
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
@@ -459,8 +684,13 @@ void MenuInput()
         g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
     {
         g_eGameState = S_GAME;
-        
-        
+
+        win.lvl1 = false;
+        win.lvl2 = false;
+        win.lvl3 = false;
+
+        g_sChar.powered = false;
+
         for (int i = 0; i < 20; i++)
         {
 
@@ -475,115 +705,39 @@ void MenuInput()
      
         }
 
-            for (int i = 0; i < 15; i++)
+        for (int i = 0; i < 15; i++)
+        {
+            do
             {
-                do
-                {
-                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
-                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
-                    g_sSpiders[i].m_bActive = true;
-                }
-                while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+                g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                g_sSpiders[i].m_bActive = true;
             }
+            while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+        }
 
+        for (int i = 0; i < 3; i++)
+        {
+            do
+            {
+                g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                g_sPowerups[i].m_bActive = true;
+            } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                == ROCK);
+        }
     }
     
 }
 
 void LoseInput()
 {
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
-        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-    {
-        g_eGameState = S_GAME;
-        if (g_eGameState = S_GAME)
-        {
-            g_sChar.m_cLocation.X = 40;
-            g_sChar.m_cLocation.Y = 12;
-            for (int i = 0; i < 15; i++)
-            {
-                do
-                {
-                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
-                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
-                    g_sSpiders[i].m_bActive = true;
-                } 
-                while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
-            }
-
-            for (int i = 0; i < 20; i++)
-            {
-                do
-                {
-                    g_sCrops[i].m_cLocation.X = (rand() % 68);
-                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
-                    g_sCrops[i].m_bActive = true;
-                } 
-                while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
-            }
-        }
-    }
-
-    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
-        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-    {
-        g_eGameState = S_MENU;
-    }
-
-
-}
-
-void WinInput()
-{
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
-        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-    {
-        g_eGameState = S_GAME;
-        if (g_eGameState = S_GAME)
-        {
-            g_sChar.m_cLocation.X = 40;
-            g_sChar.m_cLocation.Y = 12;
-            for (int i = 0; i < 15; i++)
-            {
-                do
-                {
-                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
-                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
-                    g_sSpiders[i].m_bActive = true;
-                } 
-                while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
-            }
-            for (int i = 0; i < 20; i++)
-            {
-                do
-                {
-                    g_sCrops[i].m_cLocation.X = (rand() % 68);
-                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
-                    g_sCrops[i].m_bActive = true;
-                } 
-                while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
-            }
-
-            g_sChar.m_bActive = true;
-
-        }
-    }
-
-    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
-        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
-    {
-        g_eGameState = S_MENU;
-    }
-
-}
-
-void PestControlinput()
-{
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
-        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == false && win.lvl2 == false && win.lvl3 == false)
     {
         g_eGameState = S_GAME;
 
+        g_sChar.powered = false;
         g_sChar.m_cLocation.X = 40;
         g_sChar.m_cLocation.Y = 12;
         for (int i = 0; i < 15; i++)
@@ -606,6 +760,467 @@ void PestControlinput()
                 g_sCrops[i].m_bActive = true;
             } 
             while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            do
+            {
+                g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                g_sPowerups[i].m_bActive = true;
+            } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                == ROCK);
+        }
+        
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == false && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME2;
+        if (g_eGameState == S_GAME2)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+        }
+
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == true && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME3;
+        if (g_eGameState == S_GAME3)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+
+        }
+
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+
+
+}
+
+void WinInput()
+{   
+    //detects next lvl
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == false && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME2;
+        if (g_eGameState == S_GAME2 )
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } 
+                while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } 
+                while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+        }
+
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == true && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME3;
+        if (g_eGameState == S_GAME3)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+           
+        }
+
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == true && win.lvl3 == true)
+    {
+        g_eGameState = S_MENU;
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+
+}
+
+void Killspiderinput()
+{
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == false && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME2;
+        if (g_eGameState == S_GAME2)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+        }
+
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == true && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME3;
+        if (g_eGameState == S_GAME3)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+
+        }
+
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == true && win.lvl3 == true)
+    {
+        g_eGameState = S_MENU;
+    }
+
+
+    if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+    {
+        g_eGameState = S_MENU;
+    }
+}
+
+void PestControlinput()
+{
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == false && win.lvl2 == false && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME;
+
+        g_sChar.powered = false;
+        g_sChar.m_cLocation.X = 40;
+        g_sChar.m_cLocation.Y = 12;
+        for (int i = 0; i < 15; i++)
+        {
+            do
+            {
+                g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                g_sSpiders[i].m_bActive = true;
+            } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+        }
+
+        for (int i = 0; i < 20; i++)
+        {
+            do
+            {
+                g_sCrops[i].m_cLocation.X = (rand() % 68);
+                g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                g_sCrops[i].m_bActive = true;
+            } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            do
+            {
+                g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                g_sPowerups[i].m_bActive = true;
+            } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                == ROCK);
+        }
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == false && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME2;
+        if (g_eGameState == S_GAME2)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+        }
+
+
+    }
+
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X > 31 && g_mouseEvent.mousePosition.X < 43 &&
+        g_mouseEvent.buttonState == FROM_LEFT_1ST_BUTTON_PRESSED && win.lvl1 == true && win.lvl2 == true && win.lvl3 == false)
+    {
+        g_eGameState = S_GAME3;
+        if (g_eGameState == S_GAME3)
+        {
+            g_sChar.m_cLocation.X = 40;
+            g_sChar.m_cLocation.Y = 12;
+            for (int i = 0; i < 15; i++)
+            {
+                do
+                {
+                    g_sSpiders[i].m_cLocation.X = (rand() % 68);
+                    g_sSpiders[i].m_cLocation.Y = (rand() % 22);
+                    g_sSpiders[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y] == ROCK);
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                do
+                {
+                    g_sCrops[i].m_cLocation.X = (rand() % 68);
+                    g_sCrops[i].m_cLocation.Y = (rand() % 22);
+                    g_sCrops[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sCrops[i].m_cLocation.X][g_sCrops[i].m_cLocation.Y] == ROCK);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                do
+                {
+                    g_sPowerups[i].m_cLocation.X = (rand() % 68);
+                    g_sPowerups[i].m_cLocation.Y = (rand() % 22);
+                    g_sPowerups[i].m_bActive = true;
+                } while (g_sMap.mapArray[g_sPowerups[i].m_cLocation.X][g_sPowerups[i].m_cLocation.Y]
+                    == ROCK);
+            }
+
+            g_sChar.m_bActive = true;
+            g_sChar.powered = false;
+
         }
 
 
@@ -635,6 +1250,10 @@ void render()
         break;
     case S_GAME: renderGame();
         break;
+    case S_GAME2: renderGame();
+        break;
+    case S_GAME3: renderGame();
+        break;
     case S_GUIDE: renderguide();
         break;
     case S_MENU: rendermenu();
@@ -645,11 +1264,24 @@ void render()
         break;
     case S_PESTCONTROLSCREEN: renderPestscreen();
         break;
+    case S_KILLSPIDERSCREEN: renderKillspiderscreen();
     }
 
 
     renderInputEvents();    // renders status of input events
     renderToScreen();       // dump the contents of the buffer to the screen, one frame worth of game
+}
+
+void renderPowerups()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        g_Console.writeToBuffer(g_sPowerups[i].m_cLocation, (char)30, 9);
+        if (g_sPowerups[i].m_bActive == false)
+        {
+            g_Console.writeToBuffer(g_sPowerups[i].m_cLocation, (char)30, 2);
+        }
+    }
 }
 
 void renderTimer()
@@ -676,54 +1308,78 @@ void spiderMovement()
 {
     for (int i = 0; i < 15; i++)
     {
-        EnemyUpdateRate += g_dDeltaTime;
-        int random = rand() % 8 + 1;
-        switch (random)
+        if (g_sSpiders[i].m_bActive == true)
         {
-
-        case 1: // move right
-            if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.3)
+            EnemyUpdateRate += g_dDeltaTime;
+            int random = rand() % 8 + 1;
+            switch (random)
             {
-                //while (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X + 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
+
+            case 1: // move right
+                if (g_sSpiders[i].m_cLocation.X < g_Console.getConsoleSize().X - 1 && EnemyUpdateRate > 0.3)
                 {
-                    g_sSpiders[i].m_cLocation.X++;
-                    EnemyUpdateRate = 0;
-                } 
+                    if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X + 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
+                    {
+                        g_sSpiders[i].m_cLocation.X++;
+                        EnemyUpdateRate = 0;
+
+                    }
+
+                    else
+                    {
+                        break;
+                    }
+                    break;
+                }
+
+            case 2: // move up
+                if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.3)
+                {
+
+                    if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y - 1] != ROCK)
+                    {
+                        g_sSpiders[i].m_cLocation.Y--;
+                        EnemyUpdateRate = 0;
+                    }
+                    else
+                    {
+                        break;
+                    }
+
+                }
                 break;
-            }
-        case 2: // move up
-            if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.3)
-            {
-             //  if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y - 1] != ROCK)
+            case 3: //move left
+                if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.3)
                 {
-                    g_sSpiders[i].m_cLocation.Y++;
-                    EnemyUpdateRate = 0;
-                }
-            }
-            break;
-        case 3: //move left
-            if (g_sSpiders[i].m_cLocation.X > 0 && EnemyUpdateRate > 0.3)
-            {
-              // if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X - 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
-                {
-                    g_sSpiders[i].m_cLocation.X--;
-                    EnemyUpdateRate = 0;
-                }
-            }
-            break;
-        case 4: //move down
-            if (g_sSpiders[i].m_cLocation.Y > 0 && EnemyUpdateRate > 0.3)
-            {
-              //  if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y + 1] != ROCK)
-                {
-                    g_sSpiders[i].m_cLocation.Y--;
-                    EnemyUpdateRate = 0;
-                }
-            }
-            break;
+                    if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X - 1][g_sSpiders[i].m_cLocation.Y] != ROCK)
+                    {
+                        g_sSpiders[i].m_cLocation.X--;
+                        EnemyUpdateRate = 0;
+                    }
 
+                    else
+                    {
+                        break;
+                    }
+                }
+                break;
+            case 4: //move down
+                if (g_sSpiders[i].m_cLocation.Y < g_Console.getConsoleSize().Y - 1 && EnemyUpdateRate > 0.3)
+                {
+                    if (g_sMap.mapArray[g_sSpiders[i].m_cLocation.X][g_sSpiders[i].m_cLocation.Y + 1] != ROCK)
+                    {
+                        g_sSpiders[i].m_cLocation.Y++;
+                        EnemyUpdateRate = 0;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                break;
+
+            }
         }
-
     }
 }
 
@@ -759,8 +1415,9 @@ void renderGame()
     renderMap();        // renders the map to the buffer first  
     renderTimer();      // renders debug information, frame rate, elapsed time, etc
     renderCrops();
-    renderCharacter();  // renders the character into the buffer
     renderSpiders();
+    renderPowerups();
+    renderCharacter();  // renders the character into the buffer
 }
 
 //Renders the menu screen
@@ -818,6 +1475,76 @@ void rendermenu()
     }
 }
 
+void renderKillspiderscreen()
+{
+    {
+        if (win.lvl1 == false || win.lvl2 == false || win.lvl3 == false)
+        {
+            const WORD colors[] = {
+            9,26,20,22,31,
+            };
+            COORD c;
+            c.X = 28;
+            c.Y = 5;
+            colour(colors[4]);
+            g_Console.writeToBuffer(c, "YOU KILLED EM ALL", colors[0]);
+
+            c.X = 32;
+            c.Y = 10;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "Next Level", colors[0]);
+
+            c.X = 31;
+            c.Y = 14;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "Back to menu", colors[0]);
+
+            if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
+            {
+                c.X = 32;
+                c.Y = 10;
+                colour(colors[3]);
+                g_Console.writeToBuffer(c, "Next Level", colors[3]);
+            }
+
+            if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
+            {
+                c.X = 31;
+                c.Y = 14;
+                colour(colors[3]);
+                g_Console.writeToBuffer(c, "Back to menu", colors[3]);
+            }
+        }
+
+        if (win.lvl1 == true && win.lvl2 == true && win.lvl3 == true)
+        {
+            const WORD colors[] = {
+            9,26,20,22,31,
+            };
+            COORD c;
+            c.X = 28;
+            c.Y = 5;
+            colour(colors[4]);
+            g_Console.writeToBuffer(c, "YOU WIN ALL 3 LEVELS", colors[0]);
+
+            c.X = 31;
+            c.Y = 14;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "Back to menu", colors[0]);
+
+
+            if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
+            {
+                c.X = 31;
+                c.Y = 14;
+                colour(colors[3]);
+                g_Console.writeToBuffer(c, "Back to menu", colors[3]);
+            }
+        }
+    }
+}
+
+
 void renderLosingscreen()
 {
     const WORD colors[] = {
@@ -832,7 +1559,7 @@ void renderLosingscreen()
     g_Console.writeToBuffer(c, "YOU DIED", colors[0]);
 
     c.X = 32;
-    c.Y = 11;
+    c.Y = 10;
     colour(colors[0]);
     g_Console.writeToBuffer(c, "Play again", colors[0]);
 
@@ -841,10 +1568,10 @@ void renderLosingscreen()
     colour(colors[0]);
     g_Console.writeToBuffer(c, "Back to menu", colors[0]);
 
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
     {
         c.X = 32;
-        c.Y = 11;
+        c.Y = 10;
         colour(colors[3]);
         g_Console.writeToBuffer(c, "Play again", colors[3]);
     }
@@ -861,45 +1588,71 @@ void renderLosingscreen()
 
 void renderWinscreen()
 {
-    {
-        const WORD colors[] = {
-        9,26,20,22,31,
-        };
-
-        COORD c;
-
-        c.X = 33;
-        c.Y = 5;
-        colour(colors[4]);
-        g_Console.writeToBuffer(c, "YOU WIN", colors[0]);
-
-        c.X = 32;
-        c.Y = 11;
-        colour(colors[0]);
-        g_Console.writeToBuffer(c, "Play again", colors[0]);
-
-        c.X = 31;
-        c.Y = 14;
-        colour(colors[0]);
-        g_Console.writeToBuffer(c, "Back to menu", colors[0]);
-
-        if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
+    
+        if (win.lvl1 == false || win.lvl2 == false || win.lvl3 == false)
         {
+            const WORD colors[] = {
+            9,26,20,22,31,
+            };
+            COORD c;
+            c.X = 33;
+            c.Y = 5;
+            colour(colors[4]);
+            g_Console.writeToBuffer(c, "YOU WIN", colors[0]);
+
             c.X = 32;
-            c.Y = 11;
-            colour(colors[3]);
-            g_Console.writeToBuffer(c, "Play again", colors[3]);
-        }
+            c.Y = 10;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "Next Level", colors[0]);
 
-        if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
-        {
             c.X = 31;
             c.Y = 14;
-            colour(colors[3]);
-            g_Console.writeToBuffer(c, "Back to menu", colors[3]);
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "Back to menu", colors[0]);
+
+            if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
+            {
+                c.X = 32;
+                c.Y = 10;
+                colour(colors[3]);
+                g_Console.writeToBuffer(c, "Next Level", colors[3]);
+            }
+
+            if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
+            {
+                c.X = 31;
+                c.Y = 14;
+                colour(colors[3]);
+                g_Console.writeToBuffer(c, "Back to menu", colors[3]);
+            }
         }
 
-    }
+        if (win.lvl1 == true && win.lvl2 == true && win.lvl3 == true)
+        {
+            const WORD colors[] = {
+            9,26,20,22,31,
+            };
+            COORD c;
+            c.X = 28;
+            c.Y = 5;
+            colour(colors[4]);
+            g_Console.writeToBuffer(c, "YOU WIN ALL 3 LEVELS", colors[0]);
+
+            c.X = 31;
+            c.Y = 14;
+            colour(colors[0]);
+            g_Console.writeToBuffer(c, "Back to menu", colors[0]);
+
+
+            if (g_mouseEvent.mousePosition.Y == 14 && g_mouseEvent.mousePosition.X >= 31 && g_mouseEvent.mousePosition.X < 43)
+            {
+                c.X = 31;
+                c.Y = 14;
+                colour(colors[3]);
+                g_Console.writeToBuffer(c, "Back to menu", colors[3]);
+            }
+        }
+    
 }
 
 void renderPestscreen()
@@ -916,7 +1669,7 @@ void renderPestscreen()
     g_Console.writeToBuffer(c, "PEST CONTROL HAS ARRIVED", colors[0]);
 
     c.X = 32;
-    c.Y = 11;
+    c.Y = 10;
     colour(colors[0]);
     g_Console.writeToBuffer(c, "Play again", colors[0]);
 
@@ -925,10 +1678,10 @@ void renderPestscreen()
     colour(colors[0]);
     g_Console.writeToBuffer(c, "Back to menu", colors[0]);
 
-    if (g_mouseEvent.mousePosition.Y == 11 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
+    if (g_mouseEvent.mousePosition.Y == 10 && g_mouseEvent.mousePosition.X >= 32 && g_mouseEvent.mousePosition.X < 43)
     {
         c.X = 32;
-        c.Y = 11;
+        c.Y = 10;
         colour(colors[3]);
         g_Console.writeToBuffer(c, "Play again", colors[3]);
     }
@@ -1022,7 +1775,19 @@ void renderSpiders()
     // Draw the location of the spiders
     for (int i = 0; i < 15; i++)
     {
-        g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)31, 7);
+        if (g_sSpiders[i].m_bActive == true)
+        {
+            g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)31, 7);
+        }
+        if (g_sChar.powered == true)
+        {
+            g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)25, 7);
+        }
+        if (g_sSpiders[i].m_bActive == false)
+        {
+            g_Console.writeToBuffer(g_sSpiders[i].m_cLocation, (char)25, 1);
+        }
+
     }
 }
 
@@ -1035,6 +1800,7 @@ void renderCharacter()
         charColor = 224;
     }
     g_Console.writeToBuffer(g_sChar.m_cLocation, (char)7, charColor);
+
 }
 
 
